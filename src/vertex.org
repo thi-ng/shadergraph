@@ -28,13 +28,14 @@
 
 #+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/vertex.cljs :mkdirp yes :padline no
   (ns thi.ng.glsl.vertex
-   (:require-macros [thi.ng.glsl.core :refer [minified]]))
+    (:require-macros
+     [thi.ng.glsl.core :refer [defglsl]]))
 
-  (def mvp
-   {:src (minified "
-  <<vertex-mvp>>")})
+  (defglsl mvp
+    nil "
+  <<vertex-mvp>>")
 
-  (def normal
-   {:src (minified "
-  <<normal>>")})
+  (defglsl normal
+    nil "
+  <<normal>>")
 #+END_SRC

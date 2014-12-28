@@ -2,7 +2,9 @@
 
 * Contents                                                         :toc_4_gh:
  - [[#glsl-dependency-resolution][GLSL dependency resolution]]
+     - [[#core-namespace-definition][Core namespace definition]]
  - [[#glsl-minifier][GLSL minifier]]
+ - [[#macro-definitions][Macro definitions]]
 
 * GLSL dependency resolution
 
@@ -13,21 +15,31 @@ with two dependencies.
 
 *Note:*
 
-1. These namespaces also need to be =required=. 
-2. It's recommended, though optional, to use the =minified= macro for
-   all GLSL source snippets to reduce final JS file size (see next
-   section).
+1. Since GLSL snippets are stored in normal ClojureScript vars,
+   namespaces of dependent GLSL snippets need to be =required= as
+   usual.
+2. It's recommended, though optional, to use the =defglsl= or
+   =minified= macros for these GLSL source snippets to reduce
+   boilerplate & final JS file size (see next section).
 3. This library is written using Emacs ORG-mode and all GLSL snippets
    here are defined using their own code blocks, which makes development easier.
 
 #+BEGIN_SRC clojure
   (ns example
     (:require
-     [thi.ng.glsl.core :include-macros true :refer-macros [minified]]
+     [thi.ng.glsl.core :include-macros true :refer-macros [defglsl minified]]
      [other.namespace :as other]
      [another.namespace :as another]))
 
-  (def spec
+  (defglsl my-spec
+    [other/spec another/spec]
+    "vec3 myFunc(vec3 a, vec3 b) {
+       return ...;
+     }")
+
+  ;; alternatively the same spec *without* using the defglsl macro...
+
+  (def my-spec
     {:deps [other/spec another/spec]
      :src  (minified
             "vec3 myFunc(vec3 a, vec3 b) {
@@ -39,7 +51,7 @@ In order to correctly concatenate the various shader source snippets,
 a dependency graph is computed during assembly using Stuart Sierra's
 [[https://github.com/stuartsierra/dependency][dependency library]]. The =assemble= function below receives a spec and
 returns an expanded GLSL source string with all dependencies in the
-correct order.
+correct order. Note that cyclic dependencies are not supported.
 
 #+BEGIN_SRC clojure :noweb-ref deps
   (defn build-graph
@@ -58,6 +70,8 @@ correct order.
          (apply str)))
 #+END_SRC
 
+** Core namespace definition
+
 #+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/core.cljs :mkdirp yes :padline no
   (ns thi.ng.glsl.core
     (:require
@@ -70,6 +84,11 @@ correct order.
 #+END_SRC
 
 * GLSL minifier
+
+So far the minifier only performs the following operations:
+
+- comment removal (both single & multi line)
+- whitespace removal
 
 #+BEGIN_SRC clojure :noweb-ref minify
   (defn- minify-line
@@ -92,6 +111,8 @@ correct order.
            (apply str))))
 #+END_SRC
 
+* Macro definitions
+
 #+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/core.clj :mkdirp yes :padline no
   (ns thi.ng.glsl.core
     (:require
@@ -101,4 +122,8 @@ correct order.
 
   (defmacro minified
     [src] `~(minify src))
+
+  (defmacro defglsl
+    [name deps src]
+    `(def ~name {:deps ~deps :src (minified ~src)}))
 #+END_SRC

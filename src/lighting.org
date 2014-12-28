@@ -22,6 +22,12 @@
   }
 #+END_SRC
 
+#+BEGIN_SRC glsl :noweb-ref lambert-abs
+  float lambertAbs(vec3 surfaceNormal, vec3 lightDirection) {
+    return min(max(abs(dot(surfaceNormal, lightDirection)), 0.0), 1.0);
+  }
+#+END_SRC
+
 ** Phong
 
 #+BEGIN_SRC glsl :noweb-ref phong
@@ -156,46 +162,51 @@
 
 #+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/lighting.cljs :mkdirp yes :padline no
   (ns thi.ng.glsl.lighting
-    (:require-macros [thi.ng.glsl.core :refer [minified]]))
+    (:require-macros
+     [thi.ng.glsl.core :refer [defglsl]]))
 
-  (def lambert
-    {:src (minified "
-      <<lambert>>")})
+  (defglsl lambert
+    nil "
+  <<lambert>>")
 
-  (def phong
-    {:src (minified "
-    <<phong>>")})
+  (defglsl lambert-abs
+    nil "
+  <<lambert-abs>>")
 
-  (def blinn-phong
-    {:src (minified "
-    <<blinn-phong>>")})
+  (defglsl phong
+    nil "
+  <<phong>>")
 
-  (def schlick
-    {:src (minified "
-      <<schlick>>")})
+  (defglsl blinn-phong
+    nil "
+  <<blinn-phong>>")
 
-  (def beckmann-distribution
-    {:src (minified "
-    <<beckmann-dist>>")})
+  (defglsl schlick
+    nil "
+  <<schlick>>")
 
-  (def beckmann-specular
-    {:src (minified "
-    <<beckmann-specular>>")})
+  (defglsl beckmann-distribution
+    nil "
+  <<beckmann-dist>>")
 
-  (def cook-torrance
-    {:deps [beckmann-distribution]
-     :src (minified "
-      <<cook-torrance>>")})
+  (defglsl beckmann-specular
+    nil "
+  <<beckmann-specular>>")
 
-  (def skylight
-    {:src (minified "
-      <<skylight>>")})
+  (defglsl cook-torrance
+    [beckmann-distribution]
+    "
+  <<cook-torrance>>")
 
-  (def spotlight-attenuation
-    {:src (minified "
-      <<spotlight-att>>")})
+  (defglsl skylight
+    nil "
+  <<skylight>>")
 
-  (def spotlight-influence
-    {:src (minified "
-      <<spotlight-influence>>")})
+  (defglsl spotlight-attenuation
+    nil "
+  <<spotlight-att>>")
+
+  (defglsl spotlight-influence
+    nil "
+  <<spotlight-influence>>")
 #+END_SRC

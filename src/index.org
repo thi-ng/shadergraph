@@ -15,65 +15,64 @@ ALPHA quality, in active development.
 
 ** Example
 
-The brief example below defines a simple shader spec with standard
-Lambert lighting. The =assemble= function takes a map of GLSL
-dependencies and source code and returns a transformed source w/ all
-transitive deps injected in the correct order. Furthermore, the
-=minify= macro is used to shrink the original sources (all snippets
-provided by this library are minified already).
+The brief example below defines a shader pair with standard Lambert
+lighting. The =defglsl= macro is used to define a GLSL sourcecode
+snippet with (optional) dependencies. It also minifies the original
+sources at compile time (all snippets provided by this library are
+minified this way).
 
 #+BEGIN_SRC clojure
   (ns example
     (:require
-     [thi.ng.glsl.core :as glsl :include-macros true :refer-macros [minified]]
-     [thi.ng.glsl.vertex.mvp]
-     [thi.ng.glsl.vertex.normal]
-     [thi.ng.glsl.lighting.lambert]))
+     [thi.ng.glsl.core :as glsl :include-macros true :refer-macros [defglsl]]
+     [thi.ng.glsl.vertex]
+     [thi.ng.glsl.lighting]))
 
-  (def shader-spec
-    {:vs
-     (glsl/assemble
-      {:deps
-       [thi.ng.glsl.vertex.mvp/spec
-        thi.ng.glsl.vertex.normal/spec]
-       :src
-       (minified
-        "void main() {
-           vNormal = surfaceNormal(normal, normalMat);
-           gl_Position = mvp(position, model, view, proj);
-         }")})
-     :fs
-     (glsl/assemble
-      {:deps
-       [thi.ng.glsl.lighting.lambert/spec]
-       :src
-       (minified
-        "void main() {
-           float lam = lambert(normalize(vNormal), normalize(lightDir));
-           gl_FragColor = vec4(ambientCol + diffuseCol * lightCol * lam, 1.0);
-         }")})
-     :uniforms {:model      :mat4
-                :view       :mat4
-                :proj       :mat4
-                :normalMat  :mat4
-                :ambientCol :vec3
-                :diffuseCol :vec3
-                :lightCol   :vec3
-                :lightDir   :vec3}
-     :attribs  {:position   :vec3
-                :normal     :vec3}
-     :varying  {:vNormal    :vec3}})
+  (defglsl my-vertex-shader
+    [thi.ng.glsl.vertex/mvp
+     thi.ng.glsl.vertex/normal]
+    "void main() {
+       vNormal = surfaceNormal(normal, normalMat);
+       gl_Position = mvp(position, model, view, proj);
+     }")
+
+  (defglsl my-fragment-shader
+    [thi.ng.glsl.lighting/lambert]
+    "void main() {
+       float lam = lambert(normalize(vNormal), normalize(lightDir));
+       gl_FragColor = vec4(ambientCol + diffuseCol * lightCol * lam, 1.0);
+     }")
 #+END_SRC
 
-For example, using [[https://github.com/thi-ng/geom/blob/master/geom-webgl/src/index.org][geom-webgl]] this shader spec can then be compiled
-into a full shader just like this (the function injects all
-attribute, varying & uniform definitions and setters automatically):
+Apart from the =defglsl= macro, the =assemble= function is the other
+main aspect of this library. It takes a map of GLSL dependencies and
+sourcecode and returns a transformed/expanded source with all
+transitive deps injected in the correct order.
+
+Using another library like, e.g. [[https://github.com/thi-ng/geom/blob/master/geom-webgl/src/index.org][geom-webgl]], these shader sources can
+then be compiled into a full shader like this (the
+=make-shader-from-spec= function used below generates all attribute,
+varying & uniform definitions and setters automatically):
 
 #+BEGIN_SRC clojure
   (require '[thi.ng.geom.webgl.shaders :as s])
 
   (def shader
-    (s/make-shader-from-spec my-gl-context example/shader-spec))
+    (s/make-shader-from-spec
+     my-gl-context
+     {:vs (glsl/assemble my-vertex-shader)
+      :fs (glsl/assemble my-fragment-shader)
+      :uniforms {:model      :mat4
+                 :view       :mat4
+                 :proj       :mat4
+                 :normalMat  :mat4
+                 :ambientCol :vec3
+                 :diffuseCol :vec3
+                 :lightCol   :vec3
+                 :lightDir   :vec3}
+      :attribs  {:position   :vec3
+                 :normal     :vec3}
+      :varying  {:vNormal    :vec3}}))
 #+END_SRC
 
 ** Building & testing this project
