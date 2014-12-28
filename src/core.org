@@ -21,18 +21,18 @@
 
 #+BEGIN_SRC clojure :noweb-ref deps
   (defn build-graph
-    ([spec] (build-graph (dep/graph) ::root (:deps spec)))
-    ([g curr deps]
+    ([spec] (build-graph (dep/graph) spec))
+    ([g curr]
        (reduce
-        (fn [g d] (build-graph (dep/depend g curr d) d (:deps (aget d "spec"))))
-        g deps)))
+        (fn [g d] (build-graph (dep/depend g curr d) d))
+        g (:deps curr))))
 
   (defn assemble
     [spec]
     (->> spec
          (build-graph)
          (dep/topo-sort)
-         (map #(:src (if (= % ::root) spec (aget % "spec"))))
+         (map :src)
          (apply str)))
 #+END_SRC
 
@@ -103,7 +103,7 @@
   (ns thi.ng.glsl.vertex.mvp
    (:require-macros [thi.ng.glsl.minify :refer [minified]]))
 
-  (def ^:export spec
+  (def spec
    {:src (minified "
   <<vertex-mvp>>")})
 #+END_SRC
@@ -120,7 +120,7 @@
   (ns thi.ng.glsl.vertex.normal
    (:require-macros [thi.ng.glsl.minify :refer [minified]]))
 
-  (def ^:export spec
+  (def spec
    {:src (minified "
   <<normal>>")})
 #+END_SRC
@@ -141,7 +141,7 @@
   (ns thi.ng.glsl.lighting.lambert
    (:require-macros [thi.ng.glsl.minify :refer [minified]]))
 
-  (def ^:export spec
+  (def spec
    {:src (minified "
   <<lambert>>")})
 #+END_SRC
@@ -162,7 +162,7 @@
   (ns thi.ng.glsl.lighting.phong
    (:require-macros [thi.ng.glsl.minify :refer [minified]]))
 
-  (def ^:export spec
+  (def spec
    {:src (minified "
   <<phong>>")})
 #+END_SRC
@@ -191,7 +191,7 @@
   (ns thi.ng.glsl.lighting.beckmann
     (:require-macros [thi.ng.glsl.minify :refer [minified]]))
 
-  (def ^:export spec
+  (def spec
    {:src (minified "
   <<beckmann>>")})
 #+END_SRC
@@ -210,7 +210,7 @@
   (ns thi.ng.glsl.lighting.schlick
    (:require-macros [thi.ng.glsl.minify :refer [minified]]))
 
-  (def ^:export spec
+  (def spec
    {:src (minified "
   <<schlick>>")})
 #+END_SRC
@@ -256,8 +256,8 @@
      [thi.ng.glsl.lighting.beckmann]
      [thi.ng.glsl.lighting.lambert]))
 
-  (def ^:export spec
-    {:deps [js/thi.ng.glsl.lighting.beckmann]
+  (def spec
+    {:deps [thi.ng.glsl.lighting.beckmann/spec]
      :src (minified "
   <<cook-torrance>>")})
 #+END_SRC
@@ -307,7 +307,7 @@
   (ns thi.ng.glsl.lighting.skylight
     (:require-macros [thi.ng.glsl.minify :refer [minified]]))
 
-  (def ^:export spec
+  (def spec
     {:src (minified "
   <<skylight>>")})
 #+END_SRC
@@ -332,7 +332,7 @@
   (ns thi.ng.glsl.lighting.spotlight
     (:require-macros [thi.ng.glsl.minify :refer [minified]]))
 
-  (def ^:export spec
+  (def spec
     {:src (minified "
   <<spotlight>>")})
 #+END_SRC

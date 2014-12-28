@@ -36,8 +36,8 @@ provided by this library are minified already).
     {:vs
      (glsl/assemble
       {:deps
-       [js/thi.ng.glsl.vertex.mvp
-        js/thi.ng.glsl.vertex.normal]
+       [thi.ng.glsl.vertex.mvp/spec
+        thi.ng.glsl.vertex.normal/spec]
        :src
        (minified
         "void main() {
@@ -47,7 +47,7 @@ provided by this library are minified already).
      :fs
      (glsl/assemble
       {:deps
-       [js/thi.ng.glsl.lighting.lambert]
+       [thi.ng.glsl.lighting.lambert/spec]
        :src
        (minified
         "void main() {
@@ -68,14 +68,14 @@ provided by this library are minified already).
 #+END_SRC
 
 For example, using [[https://github.com/thi-ng/geom/blob/master/geom-webgl/src/index.org][geom-webgl]] this shader spec can then be compiled
-into a full shader program just like this (the function injects all
-attribute, uniform & varying definitions automatically):
+into a full shader just like this (the function injects all
+attribute, varying & uniform definitions and setters automatically):
 
 #+BEGIN_SRC clojure
-  (require '[thi.ng.geom.webgl.shaders :as shader])
+  (require '[thi.ng.geom.webgl.shaders :as s])
 
-  (def program
-    (shader/make-shader-from-spec my-gl-context example/shader-spec))
+  (def shader
+    (s/make-shader-from-spec my-gl-context example/shader-spec))
 #+END_SRC
 
 ** Building & testing this project
