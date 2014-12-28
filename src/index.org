@@ -222,7 +222,9 @@ symbol =version= holding the version string defined above:
 
 ** Module namespaces
 
-- [[core.org]]
+- [[core.org][thi.ng.glsl.core]]
+- [[vertex.org][thi.ng.glsl.vertex]]
+- [[lighting.org][thi.ng.glsl.lighting]]
 
 * Tests
 
