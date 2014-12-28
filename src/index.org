@@ -24,10 +24,8 @@ provided by this library are minified already).
 
 #+BEGIN_SRC clojure
   (ns example
-    (:require-macros
-     [thi.ng.glsl.minify :refer [minified]])
     (:require
-     [thi.ng.glsl.core :as glsl]
+     [thi.ng.glsl.core :as glsl :include-macros true :refer-macros [minified]]
      [thi.ng.glsl.vertex.mvp]
      [thi.ng.glsl.vertex.normal]
      [thi.ng.glsl.lighting.lambert]))

@@ -1,0 +1,42 @@
+#+SETUPFILE: setup.org
+
+* Contents                                                         :toc_4_gh:
+ - [[#vertices--normals][Vertices & normals]]
+     - [[#standard-mvp][Standard MVP]]
+     - [[#standard-surface-normal][Standard surface normal]]
+
+* Vertices & normals
+
+** Standard MVP
+
+#+BEGIN_SRC glsl :noweb-ref vertex-mvp
+  vec4 mvp(vec3 pos, mat4 model, mat4 view, mat4 proj) {
+    return proj * view * model * vec4(pos, 1.0);
+  }
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/vertex/mvp.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.vertex.mvp
+   (:require-macros [thi.ng.glsl.core :refer [minified]]))
+
+  (def spec
+   {:src (minified "
+  <<vertex-mvp>>")})
+#+END_SRC
+
+** Standard surface normal
+
+#+BEGIN_SRC glsl :noweb-ref normal
+  vec3 surfaceNormal(vec3 normal, mat4 normalMat) {
+    return normalize((normalMat * vec4(normal, 0.0)).xyz);
+  }
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/vertex/normal.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.vertex.normal
+   (:require-macros [thi.ng.glsl.core :refer [minified]]))
+
+  (def spec
+   {:src (minified "
+  <<normal>>")})
+#+END_SRC
