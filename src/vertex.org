@@ -4,6 +4,7 @@
  - [[#vertices--normals][Vertices & normals]]
      - [[#standard-mvp][Standard MVP]]
      - [[#standard-surface-normal][Standard surface normal]]
+     - [[#complete-namespace-definition][Complete namespace definition]]
 
 * Vertices & normals
 
@@ -15,15 +16,6 @@
   }
 #+END_SRC
 
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/vertex/mvp.cljs :mkdirp yes :padline no
-  (ns thi.ng.glsl.vertex.mvp
-   (:require-macros [thi.ng.glsl.core :refer [minified]]))
-
-  (def spec
-   {:src (minified "
-  <<vertex-mvp>>")})
-#+END_SRC
-
 ** Standard surface normal
 
 #+BEGIN_SRC glsl :noweb-ref normal
@@ -32,11 +24,17 @@
   }
 #+END_SRC
 
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/vertex/normal.cljs :mkdirp yes :padline no
-  (ns thi.ng.glsl.vertex.normal
+** Complete namespace definition
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/vertex.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.vertex
    (:require-macros [thi.ng.glsl.core :refer [minified]]))
 
-  (def spec
+  (def mvp
+   {:src (minified "
+  <<vertex-mvp>>")})
+
+  (def normal
    {:src (minified "
   <<normal>>")})
 #+END_SRC
