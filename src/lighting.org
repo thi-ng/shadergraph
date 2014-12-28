@@ -36,7 +36,9 @@
   float phong(vec3 lightDir, vec3 eyeDir, vec3 surfaceNormal) {
     return dot(reflect(-lightDir, surfaceNormal), eyeDir);
   }
+#+END_SRC
 
+#+BEGIN_SRC glsl :noweb-ref blinn-phong
   float blinnPhong(vec3 lightDir, vec3 eyeDir, vec3 surfaceNormal) {
     return dot(normalize(lightDir + eyeDir), surfaceNormal);
   }
@@ -46,9 +48,13 @@
   (ns thi.ng.glsl.lighting.phong
    (:require-macros [thi.ng.glsl.core :refer [minified]]))
 
-  (def spec
+  (def phong
    {:src (minified "
   <<phong>>")})
+
+  (def blinn-phong
+   {:src (minified "
+  <<blinn-phong>>")})
 #+END_SRC
 
 ** Beckmann Distribution
