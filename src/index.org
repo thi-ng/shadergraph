@@ -114,7 +114,7 @@ target/shaderlib-<<version>>.js
 
 **** [[https://github.com/kibu-australia/dependency][Dependency graph]]
 #+BEGIN_SRC clojure :noweb-ref dep-dep
-[kibu/dependency "0.1.2-SNAPSHOT"]
+[kibu/dependency "0.1.2-SNAPSHOT" :exclusions [org.clojure/clojure com.keminglabs/cljx]]
 #+END_SRC
 
 *** Development
