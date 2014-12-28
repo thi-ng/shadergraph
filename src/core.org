@@ -1,0 +1,338 @@
+#+SETUPFILE: setup.org
+
+* Contents                                                         :toc_4_gh:
+ - [[#glsl-dependency-resolution][GLSL dependency resolution]]
+ - [[#glsl-minifier][GLSL minifier]]
+ - [[#reusable-shader-functions][Reusable shader functions]]
+     - [[#vertex][Vertex]]
+         - [[#standard-mvp][Standard MVP]]
+         - [[#standard-surface-normal][Standard surface normal]]
+     - [[#fragment][Fragment]]
+         - [[#lighting-calculations][Lighting calculations]]
+             - [[#lambert][Lambert]]
+             - [[#phong][Phong]]
+             - [[#beckmann-distribution][Beckmann Distribution]]
+             - [[#schlick-approximation][Schlick approximation]]
+             - [[#cook-torrance][Cook-Torrance]]
+             - [[#skylight][Skylight]]
+             - [[#spotlight][Spotlight]]
+
+* GLSL dependency resolution
+
+#+BEGIN_SRC clojure :noweb-ref deps
+  (defn build-graph
+    ([spec] (build-graph (dep/graph) ::root (:deps spec)))
+    ([g curr deps]
+       (reduce
+        (fn [g d] (build-graph (dep/depend g curr d) d (:deps (aget d "spec"))))
+        g deps)))
+
+  (defn assemble
+    [spec]
+    (->> spec
+         (build-graph)
+         (dep/topo-sort)
+         (map #(:src (if (= % ::root) spec (aget % "spec"))))
+         (apply str)))
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/core.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.core
+    (:require
+     [clojure.string :as str]
+     [com.stuartsierra.dependency :as dep]))
+
+  <<deps>>
+#+END_SRC
+
+* GLSL minifier
+
+#+BEGIN_SRC clojure :noweb-ref minify
+  (defn minify-line
+    [src]
+    (let [src (-> src
+                  (str/replace #"\s{2,}|\t" "")
+                  (str/replace #"\s*(\{|\}|\=|\*|\,|\+|/|\>|\<|\&|\||\[|\]|\(|\)|\-|\!|\;)\s*" "$1"))]
+      (if (= \# (first src))
+        (str src "\n")
+        src)))
+
+  (defn minify
+    [src]
+    (let [src (-> src
+                  (str/replace #"//.*" "")
+                  (str/replace #"/\*[\s\S]*?\*/" "")
+                  (str/replace #"^\n+" ""))]
+      (->> (str/split src #"\n")
+           (map minify-line)
+           (apply str))))
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/minify.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.minify
+    (:require
+     [clojure.string :as str]))
+
+  <<minify>>
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/minify.clj :mkdirp yes :padline no
+  (ns thi.ng.glsl.minify
+    (:require
+     [clojure.string :as str]))
+
+  <<minify>>
+
+  (defmacro minified
+    [src] `~(minify src))
+#+END_SRC
+
+* Reusable shader functions
+
+** Vertex
+
+*** Standard MVP
+
+#+BEGIN_SRC glsl :noweb-ref vertex-mvp
+  vec4 mvp(vec3 pos, mat4 model, mat4 view, mat4 proj) {
+    return proj * view * model * vec4(pos, 1.0);
+  }
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/vertex/mvp.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.vertex.mvp
+   (:require-macros [thi.ng.glsl.minify :refer [minified]]))
+
+  (def ^:export spec
+   {:src (minified "
+  <<vertex-mvp>>")})
+#+END_SRC
+
+*** Standard surface normal
+
+#+BEGIN_SRC glsl :noweb-ref normal
+  vec3 surfaceNormal(vec3 normal, mat4 normalMat) {
+    return normalize((normalMat * vec4(normal, 0.0)).xyz);
+  }
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/vertex/normal.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.vertex.normal
+   (:require-macros [thi.ng.glsl.minify :refer [minified]]))
+
+  (def ^:export spec
+   {:src (minified "
+  <<normal>>")})
+#+END_SRC
+
+** Fragment
+
+*** Lighting calculations
+
+**** Lambert
+
+#+BEGIN_SRC glsl :noweb-ref lambert
+  float lambert(vec3 surfaceNormal, vec3 lightDirection) {
+    return min(max(dot(surfaceNormal, lightDirection), 0.0), 1.0);
+  }
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/lighting/lambert.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.lighting.lambert
+   (:require-macros [thi.ng.glsl.minify :refer [minified]]))
+
+  (def ^:export spec
+   {:src (minified "
+  <<lambert>>")})
+#+END_SRC
+
+**** Phong
+
+#+BEGIN_SRC glsl :noweb-ref phong
+  float phong(vec3 lightDir, vec3 eyeDir, vec3 surfaceNormal) {
+    return dot(reflect(-lightDir, surfaceNormal), eyeDir);
+  }
+
+  float blinnPhong(vec3 lightDir, vec3 eyeDir, vec3 surfaceNormal) {
+    return dot(normalize(lightDir + eyeDir), surfaceNormal);
+  }
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/lighting/phong.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.lighting.phong
+   (:require-macros [thi.ng.glsl.minify :refer [minified]]))
+
+  (def ^:export spec
+   {:src (minified "
+  <<phong>>")})
+#+END_SRC
+
+**** Beckmann Distribution
+
+#+BEGIN_SRC glsl :noweb-ref beckmann
+  float beckmannDistribution(float x, float roughness) {
+    float NdotH = max(x, 1e-4);
+    float cos2Alpha = NdotH * NdotH;
+    float tan2Alpha = (cos2Alpha - 1.0) / cos2Alpha;
+    float roughness2 = roughness * roughness;
+    float denom = PI * roughness2 * cos2Alpha * cos2Alpha;
+    return exp(tan2Alpha / roughness2) / denom;
+  }
+
+  float beckmannSpecular(vec3 lightDirection,
+                         vec3 viewDirection,
+                         vec3 surfaceNormal,
+                         float roughness) {
+    return beckmannDistribution(dot(surfaceNormal, normalize(lightDirection + viewDirection)), roughness);
+  }
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/lighting/beckmann.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.lighting.beckmann
+    (:require-macros [thi.ng.glsl.minify :refer [minified]]))
+
+  (def ^:export spec
+   {:src (minified "
+  <<beckmann>>")})
+#+END_SRC
+
+**** Schlick approximation
+
+#+BEGIN_SRC glsl :noweb-ref schlick
+  float schlick(float r0, float smooth, vec3 normal, vec3 view) {
+    float d = min(max(1.0f - dot(normal, -view), 0.0f), 1.0f);
+    float d2 = d * d;
+    return mix(r0, 1.0, smooth * d2 * d2 * d);
+  }
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/lighting/sclick.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.lighting.schlick
+   (:require-macros [thi.ng.glsl.minify :refer [minified]]))
+
+  (def ^:export spec
+   {:src (minified "
+  <<schlick>>")})
+#+END_SRC
+
+**** Cook-Torrance
+
+#+BEGIN_SRC glsl :noweb-ref cook-torrance
+  float cookTorranceSpecular(vec3 lightDirection,
+                             vec3 viewDirection,
+                             vec3 surfaceNormal,
+                             float roughness,
+                             float fresnel) {
+
+    float VdotN = max(dot(viewDirection, surfaceNormal), 0.0);
+    float LdotN = max(dot(lightDirection, surfaceNormal), 0.0);
+
+    //Half angle vector
+    vec3 H = normalize(lightDirection + viewDirection);
+
+    //Geometric term
+    float NdotH = max(dot(surfaceNormal, H), 0.0);
+    float VdotH = max(dot(viewDirection, H), 1e-6);
+    float LdotH = max(dot(lightDirection, H), 1e-6);
+    float G1 = (2.0 * NdotH * VdotN) / VdotH;
+    float G2 = (2.0 * NdotH * LdotN) / LdotH;
+    float G = min(1.0, min(G1, G2));
+
+    //Distribution term
+    float D = beckmannDistribution(NdotH, roughness);
+
+    //Fresnel term
+    float F = pow(1.0 - VdotN, fresnel);
+
+    //Multiply terms and done
+    return  G * F * D / max(PI * VdotN, 1e-6);
+  }
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/lighting/cook-torrance.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.lighting.cook-torrance
+    (:require-macros [thi.ng.glsl.minify :refer [minified]])
+    (:require
+     [thi.ng.glsl.lighting.beckmann]
+     [thi.ng.glsl.lighting.lambert]))
+
+  (def ^:export spec
+    {:deps [js/thi.ng.glsl.lighting.beckmann]
+     :src (minified "
+  <<cook-torrance>>")})
+#+END_SRC
+
+***** Example
+
+#+BEGIN_SRC glsl
+  uniform vec3 eyePosition;
+  uniform vec3 lightPosition;
+
+  uniform float roughness, fresnel;
+
+  varying vec3 surfacePosition, surfaceNormal;
+
+  void main() {
+    //Light and view geometry
+    vec3 viewDirection = normalize(eyePosition - surfacePosition);
+    vec3 lightDirection = normalize(lightPosition - surfacePosition);
+
+    //Surface properties
+    vec3 normal = normalize(surfaceNormal);
+
+    //Compute specular power
+    float power = cookTorranceSpec(lightDirection,
+                                   viewDirection,
+                                   normal,
+                                   roughness,
+                                   fresnel);
+
+    gl_FragColor = vec4(vec3(power), 1.0);
+  }
+#+END_SRC
+
+**** Skylight
+
+#+BEGIN_SRC glsl :noweb-ref skylight
+  float skylight(float height){
+    return smoothstep(0.0, PI, PI-acos(height));
+  }
+
+  vec3 skyLightColor(vec3 col1, vec3 col2, float height) {
+    return mix(col1, col2, skylight(height));
+  }
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/lighting/skylight.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.lighting.skylight
+    (:require-macros [thi.ng.glsl.minify :refer [minified]]))
+
+  (def ^:export spec
+    {:src (minified "
+  <<skylight>>")})
+#+END_SRC
+
+**** Spotlight
+
+#+BEGIN_SRC glsl :noweb-ref spotlight
+  float attenuation(vec3 dir, float amp){
+    float dist = length(dir);
+    float radiance = 1.0 / (1.0 + pow(dist / amp, 2.0));
+    return clamp(radiance * amp, 0.0, 1.0);
+  }
+
+  float influence(vec3 normal, float coneAngle, float fallOffAngle){
+    float minConeAngle = (360.0 - coneAngle - fallOffAngle) * RAD;
+    float maxConeAngle = (360.0 - coneAngle) * RAD;
+    return smoothstep(minConeAngle, maxConeAngle, acos(normal.z));
+  }
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/lighting/spotlight.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.lighting.spotlight
+    (:require-macros [thi.ng.glsl.minify :refer [minified]]))
+
+  (def ^:export spec
+    {:src (minified "
+  <<spotlight>>")})
+#+END_SRC

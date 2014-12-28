@@ -1,0 +1,23 @@
+#+SETUPFILE: "../src/setup.org"
+
+* thi.ng.glsl.test.core
+
+#+BEGIN_SRC clojure :noweb-ref tests
+  (deftest test-dep-graph
+    (is true))
+#+END_SRC
+
+** Namespace declaration
+
+#+BEGIN_SRC clojure :tangle ../babel/test/thi/ng/glsl/test/core.cljs :noweb yes :mkdirp yes :padline no
+  (ns thi.ng.glsl.test.core
+    (:require-macros
+     [thi.ng.glsl.minify :refer [minified]]
+     [cemerick.cljs.test :refer [is deftest with-test testing]])
+    (:require
+     [thi.ng.glsl.core :as glsl]
+     [thi.ng.glsl.minify :as min]
+     [cemerick.cljs.test]))
+
+  <<tests>>
+#+END_SRC

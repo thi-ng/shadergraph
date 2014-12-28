@@ -1,0 +1,232 @@
+#+SETUPFILE: setup.org
+#+TITLE: thi.ng/shaderlib
+
+* About the project
+
+** Overview
+
+This project provides a number of commonly used GLSL shader functions
+for ClojureScript based WebGL projects, a dependency resolution
+mechanism for these functions and a basic shader minifier.
+
+** Status
+
+ALPHA quality, in active development.
+
+** Example
+
+The brief example below defines a simple shader spec with standard
+Lambert lighting. The =assemble= function takes a map of GLSL
+dependencies and source code and returns a transformed source w/ all
+transitive deps injected in the correct order. Furthermore, the
+=minify= macro is used to shrink the original sources (all snippets
+provided by this library are minified already).
+
+#+BEGIN_SRC clojure
+  (ns example
+    (:require-macros
+     [thi.ng.glsl.minify :refer [minified]])
+    (:require
+     [thi.ng.glsl.core :as glsl]
+     [thi.ng.glsl.vertex.mvp]
+     [thi.ng.glsl.vertex.normal]
+     [thi.ng.glsl.lighting.lambert]))
+
+  (def shader-spec
+    {:vs
+     (glsl/assemble
+      {:deps
+       [js/thi.ng.glsl.vertex.mvp
+        js/thi.ng.glsl.vertex.normal]
+       :src
+       (minified
+        "void main() {
+           vNormal = surfaceNormal(normal, normalMat);
+           gl_Position = mvp(position, model, view, proj);
+         }")})
+     :fs
+     (glsl/assemble
+      {:deps
+       [js/thi.ng.glsl.lighting.lambert]
+       :src
+       (minified
+        "void main() {
+           float lam = lambert(normalize(vNormal), normalize(lightDir));
+           gl_FragColor = vec4(ambientCol + diffuseCol * lightCol * lam, 1.0);
+         }")})
+     :uniforms {:model      :mat4
+                :view       :mat4
+                :proj       :mat4
+                :normalMat  :mat4
+                :ambientCol :vec3
+                :diffuseCol :vec3
+                :lightCol   :vec3
+                :lightDir   :vec3}
+     :attribs  {:position   :vec3
+                :normal     :vec3}
+     :varying  {:vNormal    :vec3}})
+#+END_SRC
+
+For example, using [[https://github.com/thi-ng/geom/blob/master/geom-webgl/src/index.org][geom-webgl]] this shader spec can then be compiled
+into a full shader program just like this (the function injects all
+attribute, uniform & varying definitions automatically):
+
+#+BEGIN_SRC clojure
+  (require '[thi.ng.geom.webgl.shaders :as shader])
+
+  (def program
+    (shader/make-shader-from-spec my-gl-context example/shader-spec))
+#+END_SRC
+
+** Building & testing this project
+
+** Injected properties                                             :noexport:
+
+#+BEGIN_SRC clojure :exports none :noweb-ref version
+0.1.0-SNAPSHOT
+#+END_SRC
+
+#+BEGIN_SRC clojure :exports none :noweb-ref project-url
+https://github.com/thi-ng/shaderlib
+#+END_SRC
+
+#+BEGIN_SRC clojure :exports none :noweb-ref project-name
+thi.ng/shaderlib
+#+END_SRC
+
+#+BEGIN_SRC clojure :exports none :noweb yes :noweb-ref cljs-artefact-path
+target/shaderlib-<<version>>.js
+#+END_SRC
+
+** Dependencies
+
+*** Runtime
+
+**** [[https://github.com/clojure/clojure][Clojure]]
+#+BEGIN_SRC clojure :noweb-ref dep-clj
+[org.clojure/clojure "1.6.0"]
+#+END_SRC
+
+**** [[https://github.com/clojure/clojurescript][ClojureScript]]
+#+BEGIN_SRC clojure :noweb-ref dep-cljs
+[org.clojure/clojurescript "0.0-2411"]
+#+END_SRC
+
+**** [[https://github.com/kibu-australia/dependency][Dependency graph]]
+#+BEGIN_SRC clojure :noweb-ref dep-dep
+[kibu/dependency "0.1.2-SNAPSHOT"]
+#+END_SRC
+
+*** Development
+
+**** [[https://github.com/cemerick/clojurescript.test][clojurescript.test]]
+#+BEGIN_SRC clojure :noweb-ref dep-cljs-test
+[com.cemerick/clojurescript.test "0.3.3"]
+#+END_SRC
+
+**** [[https://github.com/emezeske/lein-cljsbuild][Cljsbuild]]
+#+BEGIN_SRC clojure :noweb-ref dep-cljsbuild
+[lein-cljsbuild "1.0.4-SNAPSHOT"]
+#+END_SRC
+
+** Release history
+
+| *Version* | *Released* | *Description* | *Lein coordinates* | *Tagged Github URL* |
+|-----------+------------+---------------+--------------------+---------------------|
+|           |            |               |                    |                     |
+
+** Contributors
+
+| *Name*          | *Role*                          | *Website*           |
+| [[mailto:k@thi.ng][Karsten Schmidt]] | initiator & principal developer | [[http://postspectacular.com][postspectacular.com]] |
+|                 |                                 | [[http://thi.ng][thi.ng]]              |
+
+** Leiningen coordinates
+
+#+BEGIN_SRC clojure :noweb yes :noweb-ref lein-coords
+  [<<project-name>> "<<version>>"]
+#+END_SRC
+
+** Leiningen project file                                          :noexport:
+
+#+BEGIN_SRC clojure :tangle ../babel/project.clj :noweb yes :mkdirp yes :padline no
+  (defproject <<project-name>> "<<version>>"
+    :description  "WebGL/GLSL shader library & dependency framework for ClojureScript"
+    :url          "<<project-url>>"
+    :license      {:name "Apache Software License"
+                   :url "http://www.apache.org/licenses/LICENSE-2.0"
+                   :distribution :repo}
+    :scm          {:name "git"
+                   :url  "<<project-url>>"}
+
+    :min-lein-version "2.4.0"
+
+    :dependencies [<<dep-clj>>
+                   <<dep-cljs>>
+                   <<dep-dep>>]
+
+    :profiles {:dev {:plugins [<<dep-cljsbuild>>
+                               <<dep-cljs-test>>]
+                     :aliases {"cleantest" ["do" "clean," "cljsbuild" "test"]}}}
+
+    :cljsbuild {:builds [{:source-paths ["src" "test"]
+                          :id "simple"
+                          :compiler {:output-to "<<cljs-artefact-path>>"
+                                     :optimizations :whitespace
+                                     :pretty-print true}}
+                         {:source-paths ["src" "test"]
+                          :id "prod"
+                          :compiler {:output-to "<<cljs-artefact-path>>"
+                                     :optimizations :advanced
+                                     :pretty-print false}}]
+                :test-commands {"unit-tests" ["phantomjs" :runner "<<cljs-artefact-path>>"]}}
+
+    :pom-addition [:developers [:developer
+                                [:name "Karsten Schmidt"]
+                                [:url "http://postspectacular.com"]
+                                [:timezone "0"]]])
+#+END_SRC
+
+** ClojureScript HTML harness                                      :noexport:
+
+#+BEGIN_SRC html :tangle ../babel/index.html :noweb yes :mkdirp yes :padline no
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <title><<lein-coords>> test</title>
+    </head>
+    <body>
+      <canvas id="main" width="640" height="480"></canvas>
+      <script type="text/javascript" src="<<cljs-artefact-path>>"></script>
+    </body>
+  </html>
+#+END_SRC
+
+** Accessing library version during runtime
+
+The autogenerated namespace =thi.ng.glsl.version= contains a single
+symbol =version= holding the version string defined above:
+
+#+BEGIN_SRC clojure :noweb yes
+  (use 'thi.ng.glsl.version)
+  
+  (prn version)
+  ; "<<version>>"
+#+END_SRC
+
+*** Version namespace                                              :noexport:
+
+#+BEGIN_SRC clojure :tangle ../babel/src/thi/ng/glsl/version.cljs :noweb yes :mkdirp yes :padline no
+  (ns thi.ng.glsl.version)
+  (def version "<<version>>")
+#+END_SRC
+
+* Modules
+
+** Module namespaces
+
+- [[core.org]]
+
+* Tests
+
+- [[../test/core.org]]
