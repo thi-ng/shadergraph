@@ -4,10 +4,12 @@
  - [[#lighting-calculations][Lighting calculations]]
      - [[#lambert][Lambert]]
      - [[#phong][Phong]]
-     - [[#beckmann-distribution][Beckmann Distribution]]
+     - [[#beckmann-distribution][Beckmann distribution]]
+     - [[#beckmann-specular][Beckmann specular]]
      - [[#schlick-approximation][Schlick approximation]]
      - [[#cook-torrance][Cook-Torrance]]
-         - [[#example][Example]]
+     - [[#oren-nayar][Oren-Nayar]]
+     - [[#ward][Ward]]
      - [[#skylight][Skylight]]
      - [[#spotlight][Spotlight]]
      - [[#complete-namespace-definition][Complete namespace definition]]
@@ -42,7 +44,7 @@
   }
 #+END_SRC
 
-** Beckmann Distribution
+** Beckmann distribution
 
 #+BEGIN_SRC glsl :noweb-ref beckmann-dist
   float beckmannDistribution(float x, float roughness) {
@@ -55,6 +57,7 @@
   }
 #+END_SRC
 
+** Beckmann specular
 #+BEGIN_SRC glsl :noweb-ref beckmann-specular
   float beckmannSpecular(vec3 lightDirection,
                          vec3 viewDirection,
@@ -77,11 +80,11 @@
 ** Cook-Torrance
 
 #+BEGIN_SRC glsl :noweb-ref cook-torrance
-  float cookTorranceSpecular(vec3 lightDirection,
-                             vec3 viewDirection,
-                             vec3 surfaceNormal,
-                             float roughness,
-                             float fresnel) {
+  float cookTorrance(vec3 lightDirection,
+                     vec3 viewDirection,
+                     vec3 surfaceNormal,
+                     float roughness,
+                     float fresnel) {
 
     float VdotN = max(dot(viewDirection, surfaceNormal), 0.0);
     float LdotN = max(dot(lightDirection, surfaceNormal), 0.0);
@@ -108,34 +111,71 @@
   }
 #+END_SRC
 
-*** Example
+** Oren-Nayar
 
-#+BEGIN_SRC glsl
-  //Light and view geometry
-  vec3 viewDirection = normalize(eyePosition - surfacePosition);
-  vec3 lightDirection = normalize(lightPosition - surfacePosition);
+#+BEGIN_SRC glsl :noweb-ref oren-nayar
+  float orenNayar(vec3 lightDirection,
+                  vec3 viewDirection,
+                  vec3 surfaceNormal,
+                  float roughness,
+                  float albedo) {
 
-  //Surface properties
-  vec3 normal = normalize(surfaceNormal);
+    float LdotV = dot(lightDirection, viewDirection);
+    float NdotL = dot(lightDirection, surfaceNormal);
+    float NdotV = dot(surfaceNormal, viewDirection);
 
-  //Compute specular power
-  float power = cookTorranceSpecular(lightDirection,
-                                     viewDirection,
-                                     normal,
-                                     roughness,
-                                     fresnel);
+    float s = LdotV - NdotL * NdotV;
+    float t = mix(1.0, max(NdotL, NdotV), step(0.0, s));
 
-  gl_FragColor = vec4(vec3(power), 1.0);
+    float sigma2 = roughness * roughness;
+    float A = 1.0 + sigma2 * (albedo / (sigma2 + 0.13) + 0.5 / (sigma2 + 0.33));
+    float B = 0.45 * sigma2 / (sigma2 + 0.09);
+
+    return albedo * max(0.0, NdotL) * (A + B * s / t) / PI;
+  }
+#+END_SRC
+
+** Ward
+
+#+BEGIN_SRC glsl :noweb-ref ward
+  float ward(vec3 lightDirection,
+             vec3 viewDirection,
+             vec3 surfaceNormal,
+             vec3 fiberParallel,
+             vec3 fiberPerpendicular,
+             float shinyParallel,
+             float shinyPerpendicular) {
+
+    float NdotL = dot(surfaceNormal, lightDirection);
+    float NdotR = dot(surfaceNormal, viewDirection);
+
+    if(NdotL < 0.0 || NdotR < 0.0) {
+      return 0.0;
+    }
+
+    vec3 H = normalize(lightDirection + viewDirection);
+
+    float NdotH = dot(surfaceNormal, H);
+    float XdotH = dot(fiberParallel, H);
+    float YdotH = dot(fiberPerpendicular, H);
+
+    float coeff = sqrt(NdotL/NdotR) / (2.0 * TWO_PI * shinyParallel * shinyPerpendicular);
+    float theta = (pow(XdotH/shinyParallel, 2.0) + pow(YdotH/shinyPerpendicular, 2.0)) / (1.0 + NdotH);
+
+    return coeff * exp(-2.0 * theta);
+  }
 #+END_SRC
 
 ** Skylight
 
 #+BEGIN_SRC glsl :noweb-ref skylight
   float skylight(float height){
-    return smoothstep(0.0, PI, PI-acos(height));
+    return smoothstep(0.0, PI, PI - acos(height));
   }
+#+END_SRC
 
-  vec3 skyLightColor(vec3 col1, vec3 col2, float height) {
+#+BEGIN_SRC glsl :noweb-ref skylight-color
+  vec3 skylightColor(vec3 col1, vec3 col2, float height) {
     return mix(col1, col2, skylight(height));
   }
 #+END_SRC
@@ -143,7 +183,7 @@
 ** Spotlight
 
 #+BEGIN_SRC glsl :noweb-ref spotlight-att
-  float attenuation(vec3 dir, float amp){
+  float spotlightAttenuation(vec3 dir, float amp){
     float dist = length(dir);
     float radiance = 1.0 / (1.0 + pow(dist / amp, 2.0));
     return clamp(radiance * amp, 0.0, 1.0);
@@ -151,7 +191,7 @@
 #+END_SRC
 
 #+BEGIN_SRC glsl :noweb-ref spotlight-influence
-  float influence(vec3 normal, float coneAngle, float fallOffAngle){
+  float spotlightInfluence(vec3 normal, float coneAngle, float fallOffAngle){
     float minConeAngle = (360.0 - coneAngle - fallOffAngle) * RAD;
     float maxConeAngle = (360.0 - coneAngle) * RAD;
     return smoothstep(minConeAngle, maxConeAngle, acos(normal.z));
@@ -190,7 +230,8 @@
   <<beckmann-dist>>")
 
   (defglsl beckmann-specular
-    nil "
+    [beckmann-distribution]
+    "
   <<beckmann-specular>>")
 
   (defglsl cook-torrance
@@ -198,9 +239,23 @@
     "
   <<cook-torrance>>")
 
+  (defglsl oren-nayar
+    nil
+    "
+  <<oren-nayar>>")
+
+  (defglsl ward
+    nil
+    "
+  <<ward>>")
+
   (defglsl skylight
     nil "
   <<skylight>>")
+
+  (defglsl skylight-color
+      nil "
+  <<skylight-color>>")
 
   (defglsl spotlight-attenuation
     nil "

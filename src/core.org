@@ -18,9 +18,9 @@ with two dependencies.
 1. Since GLSL snippets are stored in normal ClojureScript vars,
    namespaces of dependent GLSL snippets need to be =required= as
    usual.
-2. It's recommended, though optional, to use the =defglsl= or
-   =minified= macros for these GLSL source snippets to reduce
-   boilerplate & final JS file size (see next section).
+2. It's recommended, though optional, to use the =defglsl=,
+   =glsl-spec= or =minified= macros for these GLSL source snippets to
+   reduce boilerplate & final JS file size (see macro section below).
 3. This library is written using Emacs ORG-mode and all GLSL snippets
    here are defined using their own code blocks, which makes development easier.
 
@@ -123,7 +123,10 @@ So far the minifier only performs the following operations:
   (defmacro minified
     [src] `~(minify src))
 
+  (defmacro glsl-spec
+    [deps src] `{:deps ~deps :src (minified ~src)})
+
   (defmacro defglsl
     [name deps src]
-    `(def ~name {:deps ~deps :src (minified ~src)}))
+    `(def ~name (glsl-spec ~deps ~src)))
 #+END_SRC
