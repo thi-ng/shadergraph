@@ -23,7 +23,7 @@
 
 #+BEGIN_SRC glsl :noweb-ref lambert
   float lambert(vec3 surfaceNormal, vec3 lightDirection) {
-    return min(max(dot(surfaceNormal, lightDirection), 0.0), 1.0);
+    return clamp(dot(surfaceNormal, lightDirection), 0.0, 1.0);
   }
 #+END_SRC
 
@@ -31,7 +31,7 @@
 
 #+BEGIN_SRC glsl :noweb-ref lambert-abs
   float lambertAbs(vec3 surfaceNormal, vec3 lightDirection) {
-    return min(max(abs(dot(surfaceNormal, lightDirection)), 0.0), 1.0);
+    return clamp(abs(dot(surfaceNormal, lightDirection)), 0.0, 1.0);
   }
 #+END_SRC
 
@@ -81,7 +81,7 @@
 
 #+BEGIN_SRC glsl :noweb-ref schlick
   float schlick(float r0, float smooth, vec3 normal, vec3 view) {
-    float d = min(max(1.0f - dot(normal, -view), 0.0f), 1.0f);
+    float d = clamp(1.0f - dot(normal, -view), 0.0f, 1.0f);
     float d2 = d * d;
     return mix(r0, 1.0, smooth * d2 * d2 * d);
   }

@@ -1,0 +1,57 @@
+#+SETUPFILE: setup.org
+
+* Contents                                                         :toc_4_gh:
+ - [[#fog-blending-equations][Fog blending equations]]
+     - [[#linear][Linear]]
+     - [[#exponential][Exponential]]
+     - [[#exponential-log2][Exponential (log2)]]
+     - [[#complete-namespace-definition][Complete namespace definition]]
+
+* Fog blending equations
+
+** Linear
+
+#+BEGIN_SRC glsl :noweb-ref linear
+  float fogLinear(float dist, float start, float end) {
+    return 1.0 - clamp((end - dist) / (end - start), 0.0, 1.0);
+  }
+#+END_SRC
+
+** Exponential
+
+#+BEGIN_SRC glsl :noweb-ref exp
+  float fogExp(float dist, float density) {
+    return 1.0 - clamp(exp(-density * dist), 0.0, 1.0);
+  }
+#+END_SRC
+
+** Exponential (log2)
+
+#+BEGIN_SRC glsl :noweb-ref exp2
+  float LOG2 = -1.442695;
+
+  float fogExp2(float dist, float density) {
+    float d = density * dist;
+    return 1.0 - clamp(exp2(d * d * LOG2), 0.0, 1.0);
+  }
+#+END_SRC
+
+** Complete namespace definition
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/fog.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.fog
+    (:require-macros
+     [thi.ng.glsl.core :refer [defglsl]]))
+
+  (defglsl linear
+    nil "
+  <<linear>>")
+
+  (defglsl exp
+    nil "
+  <<exp>>")
+
+  (defglsl exp2
+    nil "
+  <<exp>>")
+#+END_SRC
