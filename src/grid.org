@@ -1,0 +1,48 @@
+#+SETUPFILE: setup.org
+
+* Contents                                                         :toc_4_gh:
+ - [[#grid-lines--contours][Grid lines / contours]]
+     - [[#complete-namespace-definition][Complete namespace definition]]
+
+* Grid lines / contours
+
+#+BEGIN_SRC glsl :noweb-ref grid-1d
+  float grid1D(float coord, float gridSize, float width) {
+    return smoothstep(2.0 * width, width, abs(0.5 - (0.5 + fract(coord / gridSize))));
+  }
+#+END_SRC
+
+#+BEGIN_SRC glsl :noweb-ref grid-2d
+  float grid2D(vec2 coord, vec2 gridSize, vec2 width) {
+    const vec2 c = vec2(0.5);
+    vec2 g = smoothstep(2.0 * width, width, abs(c - (c + fract(coord / gridSize))));
+    return max(g.x, g.y);
+  }
+#+END_SRC
+
+#+BEGIN_SRC glsl :noweb-ref grid-3d
+  float grid3D(vec3 coord, vec3 gridSize, vec3 width) {
+    const vec3 c = vec3(0.5);
+    vec3 g = smoothstep(2.0 * width, width, abs(c - (c + fract(coord / gridSize))));
+    return max(max(g.x, g.y), g.z);
+  }
+#+END_SRC
+** Complete namespace definition
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/grid.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.grid
+    (:require-macros
+     [thi.ng.glsl.core :refer [defglsl]]))
+
+  (defglsl grid-1d
+    nil "
+  <<grid-1d>>")
+
+  (defglsl grid-2d
+    nil "
+  <<grid-2d>>")
+
+  (defglsl grid-3d
+    nil "
+  <<grid-3d>>")
+#+END_SRC
