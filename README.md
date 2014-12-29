@@ -1,6 +1,7 @@
 # thi.ng/shaderlib
 
-WebGL/GLSL shader library & dependency framework for ClojureScript
+A library of pure WebGL/GLSL functions and shader snippets with a
+dependency resolution framework and GLSL minifier for ClojureScript.
 
 ## Usage
 
