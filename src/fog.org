@@ -53,5 +53,5 @@
 
   (defglsl exp2
     nil "
-  <<exp>>")
+  <<exp2>>")
 #+END_SRC
