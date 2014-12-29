@@ -4,20 +4,22 @@
 
 #+BEGIN_SRC clojure :noweb-ref tests
   (deftest test-dep-graph
-    (is true))
+    (let [a (glsl-spec nil "(a)")
+          b (glsl-spec [a] "(b)")
+          c (glsl-spec [a] "(c)")
+          d1 (glsl-spec [b] "(d1)")
+          d2 (glsl-spec [b c] "(d2)")]
+      (is (= "(a)(b)(d1)(x)" (glsl/assemble (glsl-spec [d1] "(x)"))))
+      (is (= "(a)(c)(b)(d2)(x)" (glsl/assemble (glsl-spec [d2] "(x)"))))))
 #+END_SRC
 
 ** Namespace declaration
 
 #+BEGIN_SRC clojure :tangle ../babel/test/thi/ng/glsl/test/core.cljs :noweb yes :mkdirp yes :padline no
   (ns thi.ng.glsl.test.core
-    (:require-macros
-     [thi.ng.glsl.minify :refer [minified]]
-     [cemerick.cljs.test :refer [is deftest with-test testing]])
     (:require
-     [thi.ng.glsl.core :as glsl]
-     [thi.ng.glsl.minify :as min]
-     [cemerick.cljs.test]))
+     [thi.ng.glsl.core :as glsl :refer-macros [glsl-spec] :include-macros true]
+     [cemerick.cljs.test :refer-macros [is deftest with-test testing] :include-macros true]))
 
   <<tests>>
 #+END_SRC

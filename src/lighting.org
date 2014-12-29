@@ -3,10 +3,13 @@
 * Contents                                                         :toc_4_gh:
  - [[#lighting-calculations][Lighting calculations]]
      - [[#lambert][Lambert]]
+         - [[#two-sided-lambert-using-absolute-dot-product][Two-sided lambert (using absolute dot product)]]
      - [[#phong][Phong]]
+     - [[#blinn-phong][Blinn-Phong]]
      - [[#beckmann-distribution][Beckmann distribution]]
      - [[#beckmann-specular][Beckmann specular]]
      - [[#schlick-approximation][Schlick approximation]]
+         - [[#calculate-r0-from-refractive-indices][Calculate R0 from refractive indices]]
      - [[#cook-torrance][Cook-Torrance]]
      - [[#oren-nayar][Oren-Nayar]]
      - [[#ward][Ward]]
@@ -24,6 +27,8 @@
   }
 #+END_SRC
 
+*** Two-sided lambert (using absolute dot product)
+
 #+BEGIN_SRC glsl :noweb-ref lambert-abs
   float lambertAbs(vec3 surfaceNormal, vec3 lightDirection) {
     return min(max(abs(dot(surfaceNormal, lightDirection)), 0.0), 1.0);
@@ -37,6 +42,8 @@
     return dot(reflect(-lightDir, surfaceNormal), eyeDir);
   }
 #+END_SRC
+
+** Blinn-Phong
 
 #+BEGIN_SRC glsl :noweb-ref blinn-phong
   float blinnPhong(vec3 lightDir, vec3 eyeDir, vec3 surfaceNormal) {
@@ -58,6 +65,7 @@
 #+END_SRC
 
 ** Beckmann specular
+
 #+BEGIN_SRC glsl :noweb-ref beckmann-specular
   float beckmannSpecular(vec3 lightDirection,
                          vec3 viewDirection,
@@ -69,11 +77,22 @@
 
 ** Schlick approximation
 
+- https://en.wikipedia.org/wiki/Schlick%27s_approximation
+
 #+BEGIN_SRC glsl :noweb-ref schlick
   float schlick(float r0, float smooth, vec3 normal, vec3 view) {
     float d = min(max(1.0f - dot(normal, -view), 0.0f), 1.0f);
     float d2 = d * d;
     return mix(r0, 1.0, smooth * d2 * d2 * d);
+  }
+#+END_SRC
+
+*** Calculate R0 from refractive indices
+
+#+BEGIN_SRC glsl :noweb-ref schlick-r0
+  float schlickR0(float ior1, float ior2) {
+    float r = (ior1 - ior2) / (ior1 + ior2);
+    return r * r;
   }
 #+END_SRC
 
@@ -225,6 +244,10 @@
     nil "
   <<schlick>>")
 
+  (defglsl schlick-r0
+    nil "
+  <<schlick-r0>>")
+
   (defglsl beckmann-distribution
     nil "
   <<beckmann-dist>>")
@@ -254,7 +277,7 @@
   <<skylight>>")
 
   (defglsl skylight-color
-      nil "
+    nil "
   <<skylight-color>>")
 
   (defglsl spotlight-attenuation
