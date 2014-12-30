@@ -1,10 +1,10 @@
 #+SETUPFILE: setup.org
 
 * Contents                                                         :toc_4_gh:
- - [[#grid-lines--contours][Grid lines / contours]]
+ - [[#gridcontour-lines][Grid/contour lines]]
      - [[#complete-namespace-definition][Complete namespace definition]]
 
-* Grid lines / contours
+* Grid/contour lines
 
 #+BEGIN_SRC glsl :noweb-ref grid-1d
   float grid1D(float coord, float gridSize, float width) {
@@ -27,6 +27,7 @@
     return max(max(g.x, g.y), g.z);
   }
 #+END_SRC
+
 ** Complete namespace definition
 
 #+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/grid.cljs :mkdirp yes :padline no

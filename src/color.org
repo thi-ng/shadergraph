@@ -1,0 +1,91 @@
+#+SETUPFILE: setup.org
+
+* Contents                                                         :toc_4_gh:
+     - [[#hsv-to-rgb][HSV to RGB]]
+     - [[#rgb-to-hsv][RGB to HSV]]
+     - [[#luminance][Luminance]]
+     - [[#rotate-hue-hsv][Rotate hue (HSV)]]
+     - [[#rotate-hue-rgb][Rotate hue (RGB)]]
+     - [[#complete-namespace-definition][Complete namespace definition]]
+
+** HSV to RGB
+
+#+BEGIN_SRC glsl :noweb-ref hsv2rgb
+  const vec4 HSV_K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+
+  vec3 hsv2rgb(vec3 col) {
+    vec3 p = abs(fract(col.xxx + HSV_K.xyz) * 6.0 - HSV_K.www);
+    return col.z * mix(HSV_K.xxx, clamp(p - HSV_K.xxx, 0.0, 1.0), col.y);
+  }
+#+END_SRC
+
+** RGB to HSV
+
+- http://stackoverflow.com/questions/15095909/from-rgb-to-hsv-in-opengl-glsl
+
+#+BEGIN_SRC glsl :noweb-ref rgb2hsv
+  const vec4 RGB_K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+
+  vec3 rgb2hsv(vec3 c) {
+    vec4 p = mix(vec4(c.bg, RGB_K.wz), vec4(c.gb, RGB_K.xy), step(c.b, c.g));
+    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+  }
+#+END_SRC
+
+** Luminance
+
+#+BEGIN_SRC glsl :noweb-ref luminance
+  float luminance(vec3 rgb) {
+    vec3 l = rgb * vec3(0.299, 0.587, 0.114);
+    return l.x + l.y + l.z;
+  }
+#+END_SRC
+
+** Rotate hue (HSV)
+
+#+BEGIN_SRC glsl :noweb-ref rotate-hue-hsv
+  vec3 rotateHueHSV(vec3 hsv, float theta) {
+    float h = mod(hsv.x + mod(theta, TWO_PI) / TWO_PI, 1.0);
+    if (h < 0.0) { h += 1.0; }
+    return vec3(h, hsv.yz);
+  }
+#+END_SRC
+
+** Rotate hue (RGB)
+
+#+BEGIN_SRC glsl :noweb-ref rotate-hue-rgb
+  vec3 rotateHueRGB(vec3 rgb, float theta) {
+    return hsv2rgb(rotateHueHSV(rgb2hsv(rgb), theta));
+  }
+#+END_SRC
+
+** Complete namespace definition
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/color.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.color
+    (:require-macros
+     [thi.ng.glsl.core :refer [defglsl]]))
+
+  (defglsl hsv2rgb
+    nil "
+  <<hsv2rgb>>")
+
+  (defglsl rgb2hsv
+    nil "
+  <<rgb2hsv>>")
+
+  (defglsl luminance
+    nil "
+  <<luminance>>")
+
+  (defglsl rotate-hue-hsv
+    nil "
+  <<rotate-hue-hsv>>")
+
+  (defglsl rotate-hue-rgb
+    nil "
+  <<rotate-hue-rgb>>")
+#+END_SRC

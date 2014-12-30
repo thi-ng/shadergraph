@@ -1,0 +1,42 @@
+#+SETUPFILE: setup.org
+
+* Contents                                                         :toc_4_gh:
+ - [[#pseudo-rngs][Pseudo RNGs]]
+     - [[#complete-namespace-definition][Complete namespace definition]]
+
+* Pseudo RNGs
+
+- http://byteblacksmith.com/improvements-to-the-canonical-one-liner-glsl-rand-for-opengl-es-2-0/
+
+#+BEGIN_SRC glsl :noweb-ref random
+  highp float random(vec2 co) {
+      highp float a = 12.9898;
+      highp float b = 78.233;
+      highp float c = 43758.5453;
+      highp float dt= dot(co.xy, vec2(a, b));
+      highp float sn= mod(dt, PI);
+      return fract(sin(sn) * c);
+  }
+#+END_SRC
+
+#+BEGIN_SRC glsl :noweb-ref random-lowp
+  float random(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  }
+#+END_SRC
+
+** Complete namespace definition
+
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/random.cljs :mkdirp yes :padline no
+  (ns thi.ng.glsl.random
+    (:require-macros
+     [thi.ng.glsl.core :refer [defglsl]]))
+
+  (defglsl random
+    nil "
+  <<random>>")
+
+  (defglsl random-lowp
+    nil "
+  <<random-lowp>>")
+#+END_SRC
