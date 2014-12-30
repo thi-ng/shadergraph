@@ -1,12 +1,16 @@
 #+SETUPFILE: setup.org
 
 * Contents                                                         :toc_4_gh:
+ - [[#color-conversion][Color conversion]]
      - [[#hsv-to-rgb][HSV to RGB]]
      - [[#rgb-to-hsv][RGB to HSV]]
+ - [[#color-manipulation][Color manipulation]]
      - [[#luminance][Luminance]]
      - [[#rotate-hue-hsv][Rotate hue (HSV)]]
      - [[#rotate-hue-rgb][Rotate hue (RGB)]]
      - [[#complete-namespace-definition][Complete namespace definition]]
+
+* Color conversion
 
 ** HSV to RGB
 
@@ -34,6 +38,9 @@
     return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
   }
 #+END_SRC
+
+
+* Color manipulation
 
 ** Luminance
 
@@ -86,6 +93,7 @@
   <<rotate-hue-hsv>>")
 
   (defglsl rotate-hue-rgb
-    nil "
+    [rgb2hsv hsv2rgb rotate-hue-hsv]
+    "
   <<rotate-hue-rgb>>")
 #+END_SRC
