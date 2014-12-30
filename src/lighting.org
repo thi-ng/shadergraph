@@ -10,6 +10,7 @@
      - [[#beckmann-specular][Beckmann specular]]
      - [[#schlick-approximation][Schlick approximation]]
          - [[#calculate-r0-from-refractive-indices][Calculate R0 from refractive indices]]
+     - [[#gaussian-specular][Gaussian specular]]
      - [[#cook-torrance][Cook-Torrance]]
      - [[#oren-nayar][Oren-Nayar]]
      - [[#ward][Ward]]
@@ -93,6 +94,20 @@
   float schlickR0(float ior1, float ior2) {
     float r = (ior1 - ior2) / (ior1 + ior2);
     return r * r;
+  }
+#+END_SRC
+
+** Gaussian specular
+
+#+BEGIN_SRC glsl :noweb-ref gaussian
+  float gaussianSpecular(vec3 lightDirection,
+                         vec3 viewDirection,
+                         vec3 surfaceNormal,
+                         float shininess) {
+    vec3 H = normalize(lightDirection + viewDirection);
+    float theta = acos(dot(H, surfaceNormal));
+    float w = theta / shininess;
+    return exp(-w * w);
   }
 #+END_SRC
 
@@ -256,6 +271,11 @@
     [beckmann-distribution]
     "
   <<beckmann-specular>>")
+
+  (defglsl gaussian-specular
+    nil
+    "
+  <<gaussian>>")
 
   (defglsl cook-torrance
     [beckmann-distribution]
