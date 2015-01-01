@@ -11,6 +11,10 @@
           d2 (glsl-spec [b c] "(d2)")]
       (is (= "(a)(b)(d1)(x)" (glsl/assemble (glsl-spec [d1] "(x)"))))
       (is (= "(a)(c)(b)(d2)(x)" (glsl/assemble (glsl-spec [d2] "(x)"))))))
+
+  (deftest test-file-spec
+    (let [spec (glsl-file-spec '[a] "resources/test/dummy.glsl")]
+      (is (= {:deps '[a] :src "void main(){gl_FragColor=vec4(1.0);}"} spec))))
 #+END_SRC
 
 ** Namespace declaration
@@ -18,8 +22,17 @@
 #+BEGIN_SRC clojure :tangle ../babel/test/thi/ng/glsl/test/core.cljs :noweb yes :mkdirp yes :padline no
   (ns thi.ng.glsl.test.core
     (:require
-     [thi.ng.glsl.core :as glsl :refer-macros [glsl-spec] :include-macros true]
-     [cemerick.cljs.test :refer-macros [is deftest with-test testing] :include-macros true]))
+     [thi.ng.glsl.core :as glsl :refer-macros [glsl-spec glsl-file-spec]]
+     [cemerick.cljs.test :refer-macros [is deftest with-test testing]]))
 
   <<tests>>
+#+END_SRC
+
+** Test resources
+
+#+BEGIN_SRC glsl :tangle ../babel/resources/test/dummy.glsl :mkdirp yes :padline no
+  // dummy test shader
+  void main() {
+    gl_FragColor = vec4(1.0);
+  }
 #+END_SRC

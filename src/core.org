@@ -20,7 +20,8 @@ with two dependencies.
    usual.
 2. It's recommended, though optional, to use the =defglsl=,
    =glsl-spec= or =minified= macros for these GLSL source snippets to
-   reduce boilerplate & final JS file size (see macro section below).
+   reduce boilerplate & final JS file size (see macro section below
+   for more details).
 3. This library is written using Emacs ORG-mode and all GLSL snippets
    here are defined using their own code blocks, which makes development easier.
 
@@ -113,6 +114,15 @@ So far the minifier only performs the following operations:
 
 * Macro definitions
 
+In addition to defining GLSL source code as Clojure strings, the
+library also allows to read source from files via the =defglsl-file=
+and =glsl-file-spec= macros. For example this spec pulls in the source
+from the file =resources/glsl/foo.glsl= in the current project dir.
+
+#+BEGIN_SRC clojure
+  (defglsl-file foo [dep1 dep2] "resources/glsl/foo.glsl")
+#+END_SRC
+
 #+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/core.clj :mkdirp yes :padline no
   (ns thi.ng.glsl.core
     (:require
@@ -126,7 +136,14 @@ So far the minifier only performs the following operations:
   (defmacro glsl-spec
     [deps src] `{:deps ~deps :src (minified ~src)})
 
+  (defmacro glsl-file-spec
+    [deps path] `{:deps ~deps :src (minified ~(slurp path))})
+
   (defmacro defglsl
     [name deps src]
     `(def ~name (glsl-spec ~deps ~src)))
+
+  (defmacro defglsl-file
+    [name deps path]
+    `(def ~name (glsl-file-spec ~deps ~path)))
 #+END_SRC
