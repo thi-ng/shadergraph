@@ -8,7 +8,7 @@
      - [[#luminance][Luminance]]
      - [[#rotate-hue-hsv][Rotate hue (HSV)]]
      - [[#rotate-hue-rgb][Rotate hue (RGB)]]
-     - [[#complete-namespace-definition][Complete namespace definition]]
+ - [[#complete-namespace-definition][Complete namespace definition]]
 
 * Color conversion
 
@@ -39,7 +39,6 @@
   }
 #+END_SRC
 
-
 * Color manipulation
 
 ** Luminance
@@ -69,7 +68,7 @@
   }
 #+END_SRC
 
-** Complete namespace definition
+* Complete namespace definition
 
 #+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/color.cljs :mkdirp yes :padline no
   (ns thi.ng.glsl.color
