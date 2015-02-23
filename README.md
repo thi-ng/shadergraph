@@ -7,6 +7,12 @@ dependency resolution framework and GLSL minifier for ClojureScript.
 
 See [index.org](src/index.org) for more information & example usage.
 
+## Leiningen coordinates
+
+```clj
+[thi.ng/shaderlib "0.1.0"]
+```
+
 ## License
 
 Copyright © 2014 Karsten Schmidt

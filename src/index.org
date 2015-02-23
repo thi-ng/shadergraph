@@ -128,9 +128,9 @@ target/shaderlib-<<version>>.js
 
 ** Release history
 
-| *Version* | *Released* | *Description* | *Lein coordinates* | *Tagged Github URL* |
-|-----------+------------+---------------+--------------------+---------------------|
-|           |            |               |                    |                     |
+| *Version* | *Released* | *Description* | *Lein coordinates*           | *Tagged Github URL* |
+|-----------+------------+---------------+------------------------------+---------------------|
+|     0.1.0 | 2015-02-22 | 1st release   | =[thi.ng/shaderlib "0.1.0"]= | [[https://github.com/thi-ng/shaderlib/tree/0.1.0][0.1.0]]               |
 
 ** Contributors
 
