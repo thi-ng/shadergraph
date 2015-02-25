@@ -1,13 +1,18 @@
 #+SETUPFILE: setup.org
-#+TITLE: thi.ng/shaderlib
+#+TITLE: thi.ng/shadergraph
 
 * About the project
 
 ** Overview
 
 This project provides a number of commonly used GLSL shader functions
-for ClojureScript based WebGL projects, a dependency resolution
-mechanism for these functions and a basic shader minifier.
+for ClojureScript based WebGL projects and a dependency graph / resolution
+mechanism for these functions. A basic shader minifier is included too.
+
+GLSL source code can be specified as strings or read from files.
+
+Several shader snippets have been gathered from other projects and
+partially refactored.
 
 ** Status
 
@@ -17,8 +22,8 @@ ALPHA quality, in active development.
 
 The brief example below defines a shader pair with standard Lambert
 lighting. The =defglsl= macro is used to define a GLSL sourcecode
-snippet with (optional) dependencies. It also minifies the original
-sources at compile time (all snippets provided by this library are
+snippet with (optional) dependencies. *It also minifies the original
+sources at compile time* (all snippets provided by this library are
 minified this way).
 
 #+BEGIN_SRC clojure
@@ -84,15 +89,15 @@ varying & uniform definitions and setters automatically):
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
-https://github.com/thi-ng/shaderlib
+https://github.com/thi-ng/shadergraph
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-name
-thi.ng/shaderlib
+thi.ng/shadergraph
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb yes :noweb-ref cljs-artefact-path
-target/shaderlib-<<version>>.js
+target/shadergraph-<<version>>.js
 #+END_SRC
 
 ** Dependencies
@@ -106,7 +111,7 @@ target/shaderlib-<<version>>.js
 
 **** [[https://github.com/clojure/clojurescript][ClojureScript]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs
-[org.clojure/clojurescript "0.0-2411"]
+[org.clojure/clojurescript "0.0-2913"]
 #+END_SRC
 
 **** [[https://github.com/kibu-australia/dependency][Dependency graph]]
@@ -123,14 +128,14 @@ target/shaderlib-<<version>>.js
 
 **** [[https://github.com/emezeske/lein-cljsbuild][Cljsbuild]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljsbuild
-[lein-cljsbuild "1.0.4-SNAPSHOT"]
+[lein-cljsbuild "1.0.4"]
 #+END_SRC
 
 ** Release history
 
-| *Version* | *Released* | *Description* | *Lein coordinates*           | *Tagged Github URL* |
-|-----------+------------+---------------+------------------------------+---------------------|
-|     0.1.0 | 2015-02-22 | 1st release   | =[thi.ng/shaderlib "0.1.0"]= | [[https://github.com/thi-ng/shaderlib/tree/0.1.0][0.1.0]]               |
+| *Version* | *Released* | *Description* | *Lein coordinates*             | *Tagged Github URL* |
+|-----------+------------+---------------+--------------------------------+---------------------|
+|     0.1.0 | 2015-02-25 | 1st release   | =[thi.ng/shadergraph "0.1.0"]= | [[https://github.com/thi-ng/shadergraph/tree/0.1.0][0.1.0]]               |
 
 ** Contributors
 
@@ -148,7 +153,7 @@ target/shaderlib-<<version>>.js
 
 #+BEGIN_SRC clojure :tangle ../babel/project.clj :noweb yes :mkdirp yes :padline no
   (defproject <<project-name>> "<<version>>"
-    :description  "WebGL/GLSL shader library & dependency framework for ClojureScript"
+    :description  "WebGL/GLSL shader library & dependency graph for ClojureScript"
     :url          "<<project-url>>"
     :license      {:name "Apache Software License"
                    :url "http://www.apache.org/licenses/LICENSE-2.0"
