@@ -15,6 +15,13 @@
   (deftest test-file-spec
     (let [spec (glsl-file-spec '[a] "resources/test/dummy.glsl")]
       (is (= {:deps '[a] :src "void main(){gl_FragColor=vec4(1.0);}"} spec))))
+
+  (defn- make-test-spec
+    [src] (->> src (glsl/minify) (glsl/glsl-spec-plain nil) (glsl/assemble)))
+
+  (deftest test-spec-plain
+    (let [src "void main() {}"]
+      (is (= "void main(){}" (make-test-spec src)))))
 #+END_SRC
 
 ** Namespace declaration

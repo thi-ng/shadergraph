@@ -41,11 +41,19 @@ with two dependencies.
   ;; alternatively the same spec *without* using the defglsl macro...
 
   (def my-spec
+    (glsl/glsl-spec-plain
+     [other/spec another/spec]
+     "vec3 myFunc(vec3 a, vec3 b) {
+        return ...;
+     }"))
+
+  ;; ...or...
+
+  (def my-spec
     {:deps [other/spec another/spec]
-     :src  (minified
-            "vec3 myFunc(vec3 a, vec3 b) {
+     :src  "vec3 myFunc(vec3 a, vec3 b) {
                return ...;
-             }")})
+            }"})
 #+END_SRC
 
 In order to correctly concatenate the various shader source snippets,
@@ -55,7 +63,7 @@ returns an expanded GLSL source string with all dependencies in the
 correct order. Note that cyclic dependencies are not supported.
 
 #+BEGIN_SRC clojure :noweb-ref deps
-  (defn build-graph
+  (defn- build-graph
     ([spec] (build-graph (dep/graph) spec))
     ([g curr]
        (reduce
@@ -64,11 +72,16 @@ correct order. Note that cyclic dependencies are not supported.
 
   (defn assemble
     [spec]
-    (->> spec
-         (build-graph)
-         (dep/topo-sort)
-         (map :src)
-         (apply str)))
+    (if (seq (:deps spec))
+      (->> spec
+           (build-graph)
+           (dep/topo-sort)
+           (mapv :src)
+           (apply str))
+      (:src spec)))
+
+  (defn glsl-spec-plain
+    [deps src] {:deps deps :src src})
 #+END_SRC
 
 ** Core namespace definition
@@ -108,7 +121,7 @@ So far the minifier only performs the following operations:
                   (str/replace #"/\*[\s\S]*?\*/" "")
                   (str/replace #"^\n+" ""))]
       (->> (str/split src #"\n")
-           (map minify-line)
+           (mapv minify-line)
            (apply str))))
 #+END_SRC
 

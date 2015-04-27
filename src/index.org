@@ -85,7 +85,7 @@ varying & uniform definitions and setters automatically):
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :exports none :noweb-ref version
-0.1.0
+0.1.1
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -106,12 +106,12 @@ target/shadergraph-<<version>>.js
 
 **** [[https://github.com/clojure/clojure][Clojure]]
 #+BEGIN_SRC clojure :noweb-ref dep-clj
-[org.clojure/clojure "1.6.0"]
+[org.clojure/clojure "1.7.0-beta1"]
 #+END_SRC
 
 **** [[https://github.com/clojure/clojurescript][ClojureScript]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs
-[org.clojure/clojurescript "0.0-2913"]
+[org.clojure/clojurescript "0.0-3211"]
 #+END_SRC
 
 **** [[https://github.com/kibu-australia/dependency][Dependency graph]]
@@ -128,14 +128,15 @@ target/shadergraph-<<version>>.js
 
 **** [[https://github.com/emezeske/lein-cljsbuild][Cljsbuild]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljsbuild
-[lein-cljsbuild "1.0.4"]
+[lein-cljsbuild "1.0.5"]
 #+END_SRC
 
 ** Release history
 
-| *Version* | *Released* | *Description* | *Lein coordinates*             | *Tagged Github URL* |
-|-----------+------------+---------------+--------------------------------+---------------------|
-|     0.1.0 | 2015-02-25 | 1st release   | =[thi.ng/shadergraph "0.1.0"]= | [[https://github.com/thi-ng/shadergraph/tree/0.1.0][0.1.0]]               |
+| *Version* | *Released* | *Description*   | *Lein coordinates*             | *Tagged Github URL* |
+|-----------+------------+-----------------+--------------------------------+---------------------|
+|     0.1.1 | 2015-04-27 | bugfix assemble | =[thi.ng/shadergraph "0.1.1"]= | [[https://github.com/thi-ng/shadergraph/tree/0.1.1][0.1.1]]               |
+|     0.1.0 | 2015-02-25 | 1st release     | =[thi.ng/shadergraph "0.1.0"]= | [[https://github.com/thi-ng/shadergraph/tree/0.1.0][0.1.0]]               |
 
 ** Contributors
 
