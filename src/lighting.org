@@ -2,21 +2,21 @@
 
 * Contents                                                         :toc_4_gh:
  - [[#lighting-calculations][Lighting calculations]]
-     - [[#lambert][Lambert]]
-         - [[#two-sided-lambert-using-absolute-dot-product][Two-sided lambert (using absolute dot product)]]
-     - [[#phong][Phong]]
-     - [[#blinn-phong][Blinn-Phong]]
-     - [[#beckmann-distribution][Beckmann distribution]]
-     - [[#beckmann-specular][Beckmann specular]]
-     - [[#schlick-approximation][Schlick approximation]]
-         - [[#calculate-r0-from-refractive-indices][Calculate R0 from refractive indices]]
-     - [[#gaussian-specular][Gaussian specular]]
-     - [[#cook-torrance][Cook-Torrance]]
-     - [[#oren-nayar][Oren-Nayar]]
-     - [[#ward][Ward]]
-     - [[#skylight][Skylight]]
-     - [[#spotlight][Spotlight]]
-     - [[#complete-namespace-definition][Complete namespace definition]]
+   - [[#lambert][Lambert]]
+     - [[#two-sided-lambert-using-absolute-dot-product][Two-sided lambert (using absolute dot product)]]
+   - [[#phong][Phong]]
+   - [[#blinn-phong][Blinn-Phong]]
+   - [[#beckmann-distribution][Beckmann distribution]]
+   - [[#beckmann-specular][Beckmann specular]]
+   - [[#schlick-approximation][Schlick approximation]]
+     - [[#calculate-r0-from-refractive-indices][Calculate R0 from refractive indices]]
+   - [[#gaussian-specular][Gaussian specular]]
+   - [[#cook-torrance][Cook-Torrance]]
+   - [[#oren-nayar][Oren-Nayar]]
+   - [[#ward][Ward]]
+   - [[#skylight][Skylight]]
+   - [[#spotlight][Spotlight]]
+   - [[#complete-namespace-definition][Complete namespace definition]]
 
 * Lighting calculations
 
@@ -82,7 +82,7 @@
 
 #+BEGIN_SRC glsl :noweb-ref schlick
   float schlick(float r0, float smooth, vec3 normal, vec3 view) {
-    float d = clamp(1.0f - dot(normal, -view), 0.0f, 1.0f);
+    float d = clamp(1.0 - dot(normal, -view), 0.0, 1.0);
     float d2 = d * d;
     return mix(r0, 1.0, smooth * d2 * d2 * d);
   }
@@ -297,7 +297,7 @@
   <<skylight>>")
 
   (defglsl skylight-color
-    nil "
+    [] "
   <<skylight-color>>")
 
   (defglsl spotlight-attenuation
