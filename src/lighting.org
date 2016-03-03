@@ -297,7 +297,7 @@
   <<skylight>>")
 
   (defglsl skylight-color
-    [] "
+    [skylight] "
   <<skylight-color>>")
 
   (defglsl spotlight-attenuation
