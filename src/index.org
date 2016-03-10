@@ -85,7 +85,7 @@ varying & uniform definitions and setters automatically):
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :exports none :noweb-ref version
-0.1.1
+0.2.0-SNAPSHOT
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -106,12 +106,12 @@ target/shadergraph-<<version>>.js
 
 **** [[https://github.com/clojure/clojure][Clojure]]
 #+BEGIN_SRC clojure :noweb-ref dep-clj
-[org.clojure/clojure "1.7.0-beta1"]
+[org.clojure/clojure "1.8.0"]
 #+END_SRC
 
 **** [[https://github.com/clojure/clojurescript][ClojureScript]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs
-[org.clojure/clojurescript "0.0-3211"]
+[org.clojure/clojurescript "1.7.228"]
 #+END_SRC
 
 **** [[https://github.com/kibu-australia/dependency][Dependency graph]]
@@ -128,7 +128,7 @@ target/shadergraph-<<version>>.js
 
 **** [[https://github.com/emezeske/lein-cljsbuild][Cljsbuild]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljsbuild
-[lein-cljsbuild "1.0.5"]
+[lein-cljsbuild "1.1.2"]
 #+END_SRC
 
 ** Release history
