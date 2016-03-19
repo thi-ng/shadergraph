@@ -111,8 +111,11 @@ So far the minifier only performs the following operations:
                   (str/replace #"\s{2,}|\t" "")
                   (str/replace #"\s*(\{|\}|\=|\*|\,|\+|/|\>|\<|\&|\||\[|\]|\(|\)|\-|\!|\;)\s*" "$1"))]
       (if (= \# (first src))
-        (str src "\n")
+        (str "\n" src "\n")
         src)))
+
+  (defn- clean-line-breaks
+    [src] (str/replace src #"\n{2,}" "\n"))
 
   (defn minify
     [src]
@@ -121,8 +124,9 @@ So far the minifier only performs the following operations:
                   (str/replace #"/\*[\s\S]*?\*/" "")
                   (str/replace #"^\n+" ""))]
       (->> (str/split src #"\n")
-           (mapv minify-line)
-           (apply str))))
+           (map minify-line)
+           (apply str)
+           (clean-line-breaks))))
 #+END_SRC
 
 * Macro definitions

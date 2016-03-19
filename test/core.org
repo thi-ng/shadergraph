@@ -2,7 +2,11 @@
 
 * thi.ng.glsl.test.core
 
-#+BEGIN_SRC clojure :noweb-ref tests
+#+BEGIN_SRC clojure :noweb-ref tests :noweb yes
+  (def dummy-minified
+    "
+  <<dummy-minified>>")
+
   (deftest test-dep-graph
     (let [a (glsl-spec nil "(a)")
           b (glsl-spec [a] "(b)")
@@ -13,8 +17,8 @@
       (is (= "(a)(c)(b)(d2)(x)" (glsl/assemble (glsl-spec [d2] "(x)"))))))
 
   (deftest test-file-spec
-    (let [spec (glsl-file-spec '[a] "resources/test/dummy.glsl")]
-      (is (= {:deps '[a] :src "void main(){gl_FragColor=vec4(1.0);}"} spec))))
+    (let [spec (glsl-file-spec '[a] "dev-resources/test/dummy.glsl")]
+      (is (= {:deps '[a] :src dummy-minified} spec))))
 
   (defn- make-test-spec
     [src] (->> src (glsl/minify) (glsl/glsl-spec-plain nil) (glsl/assemble)))
@@ -30,6 +34,15 @@
   (ns thi.ng.glsl.test.core
     (:require
      [thi.ng.glsl.core :as glsl :refer-macros [glsl-spec glsl-file-spec]]
+     [thi.ng.glsl.buffers]
+     [thi.ng.glsl.color]
+     [thi.ng.glsl.distancefields]
+     [thi.ng.glsl.fog]
+     [thi.ng.glsl.grid]
+     [thi.ng.glsl.lighting]
+     [thi.ng.glsl.matrix]
+     [thi.ng.glsl.noise]
+     [thi.ng.glsl.vertex]
      [cemerick.cljs.test :refer-macros [is deftest with-test testing]]))
 
   <<tests>>
@@ -37,9 +50,35 @@
 
 ** Test resources
 
-#+BEGIN_SRC glsl :tangle ../babel/resources/test/dummy.glsl :mkdirp yes :padline no
+#+BEGIN_SRC glsl :tangle ../babel/dev-resources/test/dummy.glsl :mkdirp yes :padline no
   // dummy test shader
+  #ifdef GL_FRAGMENT_PRECISION_HIGH
+  precision highp int;
+  precision highp float;
+  #else
+  precision mediump int;
+  precision mediump float;
+  #endif
   void main() {
-    gl_FragColor = vec4(1.0);
+    #ifdef FOO
+    gl_FragColor = vec4(1.0, 2.0 ,  3.0  ,4.0  );
+    #endif
+  }
+
+  // end shader
+#+END_SRC
+
+*** Dummy shader (minified)
+
+#+BEGIN_SRC glsl :noweb-ref dummy-minified
+  #ifdef GL_FRAGMENT_PRECISION_HIGH
+  precision highp int;precision highp float;
+  #else
+  precision mediump int;precision mediump float;
+  #endif
+  void main(){
+  #ifdef FOO
+  gl_FragColor=vec4(1.0,2.0,3.0,4.0);
+  #endif
   }
 #+END_SRC
