@@ -8,7 +8,6 @@
      - [[#complete-namespace-definition][Complete namespace definition]]
 
 * Vertices & normals
-
 ** Standard MVP
 
 #+BEGIN_SRC glsl :noweb-ref vertex-mvp
@@ -62,7 +61,7 @@
     nil "
   <<vertex-mvp>>")
 
-  (defglsl normal
+  (defglsl surface-normal
     nil "
   <<normal>>")
 

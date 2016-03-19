@@ -2,24 +2,23 @@
 
 * Contents                                                         :toc_4_gh:
  - [[#lighting-calculations][Lighting calculations]]
-   - [[#lambert][Lambert]]
-     - [[#two-sided-lambert-using-absolute-dot-product][Two-sided lambert (using absolute dot product)]]
-   - [[#phong][Phong]]
-   - [[#blinn-phong][Blinn-Phong]]
-   - [[#beckmann-distribution][Beckmann distribution]]
-   - [[#beckmann-specular][Beckmann specular]]
-   - [[#schlick-approximation][Schlick approximation]]
-     - [[#calculate-r0-from-refractive-indices][Calculate R0 from refractive indices]]
-   - [[#gaussian-specular][Gaussian specular]]
-   - [[#cook-torrance][Cook-Torrance]]
-   - [[#oren-nayar][Oren-Nayar]]
-   - [[#ward][Ward]]
-   - [[#skylight][Skylight]]
-   - [[#spotlight][Spotlight]]
-   - [[#complete-namespace-definition][Complete namespace definition]]
+     - [[#lambert][Lambert]]
+         - [[#two-sided-lambert-using-absolute-dot-product][Two-sided lambert (using absolute dot product)]]
+     - [[#phong][Phong]]
+     - [[#blinn-phong][Blinn-Phong]]
+     - [[#beckmann-distribution][Beckmann distribution]]
+     - [[#beckmann-specular][Beckmann specular]]
+     - [[#schlick-approximation][Schlick approximation]]
+         - [[#calculate-r0-from-refractive-indices][Calculate R0 from refractive indices]]
+     - [[#gaussian-specular][Gaussian specular]]
+     - [[#cook-torrance][Cook-Torrance]]
+     - [[#oren-nayar][Oren-Nayar]]
+     - [[#ward][Ward]]
+     - [[#skylight][Skylight]]
+     - [[#spotlight][Spotlight]]
+     - [[#complete-namespace-definition][Complete namespace definition]]
 
 * Lighting calculations
-
 ** Lambert
 
 #+BEGIN_SRC glsl :noweb-ref lambert
@@ -268,28 +267,23 @@
   <<beckmann-dist>>")
 
   (defglsl beckmann-specular
-    [beckmann-distribution]
-    "
+    [beckmann-distribution] "
   <<beckmann-specular>>")
 
   (defglsl gaussian-specular
-    nil
-    "
+    nil "
   <<gaussian>>")
 
   (defglsl cook-torrance
-    [beckmann-distribution]
-    "
+    [beckmann-distribution] "
   <<cook-torrance>>")
 
   (defglsl oren-nayar
-    nil
-    "
+    nil "
   <<oren-nayar>>")
 
   (defglsl ward
-    nil
-    "
+    nil "
   <<ward>>")
 
   (defglsl skylight

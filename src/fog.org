@@ -43,15 +43,15 @@
     (:require-macros
      [thi.ng.glsl.core :refer [defglsl]]))
 
-  (defglsl linear
+  (defglsl fog-linear
     nil "
   <<linear>>")
 
-  (defglsl exp
+  (defglsl fog-exp
     nil "
   <<exp>>")
 
-  (defglsl exp2
+  (defglsl fog-exp2
     nil "
   <<exp2>>")
 #+END_SRC

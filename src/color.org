@@ -11,7 +11,6 @@
  - [[#complete-namespace-definition][Complete namespace definition]]
 
 * Color conversion
-
 ** HSV to RGB
 
 #+BEGIN_SRC glsl :noweb-ref hsv2rgb
@@ -40,7 +39,6 @@
 #+END_SRC
 
 * Color manipulation
-
 ** Luminance
 
 #+BEGIN_SRC glsl :noweb-ref luminance

@@ -8,7 +8,6 @@
      - [[#complete-namespace-definition][Complete namespace definition]]
 
 * Matrix operations
-
 ** Determinant
 
 #+BEGIN_SRC glsl :noweb-ref det
@@ -44,8 +43,8 @@
 
 #+BEGIN_SRC glsl :noweb-ref invert
   mat2 invert(mat2 m) {
-    return mat2(m[1][1],-m[0][1], -m[1][0], m[0][0])
-             / (m[0][0]*m[1][1] - m[0][1]*m[1][0]);
+    return mat2(m[1][1], -m[0][1], -m[1][0], m[0][0])
+             / (m[0][0] * m[1][1] - m[0][1] * m[1][0]);
   }
 
   mat3 invert(mat3 m) {

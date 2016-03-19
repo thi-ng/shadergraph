@@ -6,8 +6,8 @@
 
 * Read-back float buffer
 #+BEGIN_SRC glsl :noweb-ref pack-float
-  #define FLOAT_MAX  1.70141184e38
-  #define FLOAT_MIN  1.17549435e-38
+  #define FLOAT_MAX 1.70141184e38
+  #define FLOAT_MIN 1.17549435e-38
 
   lowp vec4 packFloat(highp float v) {
     highp float av = abs(v);
@@ -21,7 +21,7 @@
       return vec4(255.0, 128.0, 0.0, 0.0) / 255.0;
     }
 
-    highp vec4 c = vec4(0,0,0,0);
+    highp vec4 c = vec4(0);
 
     //Compute exponent and mantissa
     highp float e = floor(log2(av));
