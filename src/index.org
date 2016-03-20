@@ -2,17 +2,17 @@
 #+TITLE: thi.ng/shadergraph
 
 * About the project
-
 ** Overview
 
 This project provides a number of commonly used GLSL shader functions
-for ClojureScript based WebGL projects and a dependency graph / resolution
-mechanism for these functions. A basic shader minifier is included too.
+for ClojureScript based WebGL projects and a dependency graph /
+resolution mechanism for these functions. A basic shader minifier is
+included too (both compile-time and runtime versions are provided).
 
 GLSL source code can be specified as strings or read from files.
 
 Several shader snippets have been gathered from other projects and
-partially refactored.
+partially refactored into pure functions.
 
 ** Status
 
@@ -35,7 +35,7 @@ minified this way).
 
   (defglsl my-vertex-shader
     [thi.ng.glsl.vertex/mvp
-     thi.ng.glsl.vertex/normal]
+     thi.ng.glsl.vertex/surface-normal]
     "void main() {
        vNormal = surfaceNormal(normal, normalMat);
        gl_Position = mvp(position, model, view, proj);
@@ -50,12 +50,12 @@ minified this way).
 #+END_SRC
 
 Apart from the =defglsl= macro, the =assemble= function is the other
-main aspect of this library. It takes a map of GLSL dependencies and
+main tool in this library. It takes a map of GLSL dependencies and
 sourcecode and returns a transformed/expanded source with all
 transitive deps injected in the correct order.
 
-Using another library like, e.g. [[https://github.com/thi-ng/geom/blob/master/geom-webgl/src/index.org][geom-webgl]], these shader sources can
-then be compiled into a full shader like this (the
+Using another library like, e.g. [[https://github.com/thi-ng/geom/][thi.ng/geom]] 's WebGL module, these
+shader sources can then be combined into a full shader like this (the
 =make-shader-from-spec= function used below generates all attribute,
 varying & uniform definitions and setters automatically):
 
@@ -85,7 +85,7 @@ varying & uniform definitions and setters automatically):
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :exports none :noweb-ref version
-0.2.0-SNAPSHOT
+0.2.0
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -101,9 +101,7 @@ target/shadergraph-<<version>>.js
 #+END_SRC
 
 ** Dependencies
-
 *** Runtime
-
 **** [[https://github.com/clojure/clojure][Clojure]]
 #+BEGIN_SRC clojure :noweb-ref dep-clj
 [org.clojure/clojure "1.8.0"]
@@ -120,7 +118,6 @@ target/shadergraph-<<version>>.js
 #+END_SRC
 
 *** Development
-
 **** [[https://github.com/cemerick/clojurescript.test][clojurescript.test]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs-test
 [com.cemerick/clojurescript.test "0.3.3"]
@@ -128,15 +125,16 @@ target/shadergraph-<<version>>.js
 
 **** [[https://github.com/emezeske/lein-cljsbuild][Cljsbuild]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljsbuild
-[lein-cljsbuild "1.1.2"]
+[lein-cljsbuild "1.1.3"]
 #+END_SRC
 
 ** Release history
 
-| *Version* | *Released* | *Description*   | *Lein coordinates*             | *Tagged Github URL* |
-|-----------+------------+-----------------+--------------------------------+---------------------|
-|     0.1.1 | 2015-04-27 | bugfix assemble | =[thi.ng/shadergraph "0.1.1"]= | [[https://github.com/thi-ng/shadergraph/tree/0.1.1][0.1.1]]               |
-|     0.1.0 | 2015-02-25 | 1st release     | =[thi.ng/shadergraph "0.1.0"]= | [[https://github.com/thi-ng/shadergraph/tree/0.1.0][0.1.0]]               |
+| *Version* | *Released* | *Description*                   | *Lein coordinates*             | *Tagged Github URL* |
+|-----------+------------+---------------------------------+--------------------------------+---------------------|
+|     0.2.0 | 2016-03-20 | bugfix minify, update fn naming | =[thi.ng/shadergraph "0.2.0"]= | [[https://github.com/thi-ng/shadergraph/tree/0.2.0][0.2.0]]               |
+|     0.1.1 | 2015-04-27 | bugfix assemble                 | =[thi.ng/shadergraph "0.1.1"]= | [[https://github.com/thi-ng/shadergraph/tree/0.1.1][0.1.1]]               |
+|     0.1.0 | 2015-02-25 | 1st release                     | =[thi.ng/shadergraph "0.1.0"]= | [[https://github.com/thi-ng/shadergraph/tree/0.1.0][0.1.0]]               |
 
 ** Contributors
 
@@ -225,13 +223,17 @@ symbol =version= holding the version string defined above:
 #+END_SRC
 
 * Modules
-
 ** Module namespaces
 
 - [[core.org][thi.ng.glsl.core]]
+- [[buffers.org][thi.ng.glsl.buffers]]
+- [[color.org][thi.ng.glsl.color]]
+- [[distancefields.org][thi.ng.glsl.distancefields]]
 - [[fog.org][thi.ng.glsl.fog]]
 - [[grid.org][thi.ng.glsl.grid]]
 - [[lighting.org][thi.ng.glsl.lighting]]
+- [[matrix.org][thi.ng.glsl.matrix]]
+- [[noise.org][thi.ng.glsl.noise]]
 - [[vertex.org][thi.ng.glsl.vertex]]
 
 * Tests

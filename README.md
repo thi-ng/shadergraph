@@ -16,7 +16,7 @@ See [index.org](src/index.org) for more information & example usage.
 ## Leiningen coordinates
 
 ```clj
-[thi.ng/shadergraph "0.1.1"]
+[thi.ng/shadergraph "0.2.0"]
 ```
 
 ## License
