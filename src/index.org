@@ -6,7 +6,7 @@
 
 This project provides a number of commonly used GLSL shader functions
 for Clojure/ClojureScript based OpenGL/WebGL projects and a dependency
-graph / resolution mechanism for these functions. A basic shader
+graph / resolution mechanism for shader functions. A basic shader
 minifier is included too (both compile-time and runtime versions are
 provided).
 
@@ -14,6 +14,17 @@ GLSL source code can be specified as strings or read from files.
 
 Several shader snippets have been gathered from other projects and
 partially refactored into pure functions.
+
+** Leiningen coordinates
+*** Latest stable
+#+BEGIN_SRC
+[thi.ng/shadergraph "0.2.0"]
+#+END_SRC
+
+*** Latest snapshot
+#+BEGIN_SRC
+[thi.ng/shadergraph "0.3.0-SNAPSHOT"]
+#+END_SRC
 
 ** Status
 
