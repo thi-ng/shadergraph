@@ -68,28 +68,28 @@
 
 * Complete namespace definition
 
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/color.cljs :mkdirp yes :padline no
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/color.cljc :mkdirp yes :padline no
   (ns thi.ng.glsl.color
-    (:require-macros
-     [thi.ng.glsl.core :refer [defglsl]]))
+    (:require
+     [thi.ng.glsl.core :as glsl :include-macros true]))
 
-  (defglsl hsv2rgb
+  (glsl/defglsl hsv2rgb
     nil "
   <<hsv2rgb>>")
 
-  (defglsl rgb2hsv
+  (glsl/defglsl rgb2hsv
     nil "
   <<rgb2hsv>>")
 
-  (defglsl luminance
+  (glsl/defglsl luminance
     nil "
   <<luminance>>")
 
-  (defglsl rotate-hue-hsv
+  (glsl/defglsl rotate-hue-hsv
     nil "
   <<rotate-hue-hsv>>")
 
-  (defglsl rotate-hue-rgb
+  (glsl/defglsl rotate-hue-rgb
     [rgb2hsv hsv2rgb rotate-hue-hsv]
     "
   <<rotate-hue-rgb>>")

@@ -30,20 +30,20 @@
 
 ** Complete namespace definition
 
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/grid.cljs :mkdirp yes :padline no
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/grid.cljc :mkdirp yes :padline no
   (ns thi.ng.glsl.grid
-    (:require-macros
-     [thi.ng.glsl.core :refer [defglsl]]))
+    (:require
+     [thi.ng.glsl.core :as glsl :include-macros true]))
 
-  (defglsl grid-1d
+  (glsl/defglsl grid-1d
     nil "
   <<grid-1d>>")
 
-  (defglsl grid-2d
+  (glsl/defglsl grid-2d
     nil "
   <<grid-2d>>")
 
-  (defglsl grid-3d
+  (glsl/defglsl grid-3d
     nil "
   <<grid-3d>>")
 #+END_SRC

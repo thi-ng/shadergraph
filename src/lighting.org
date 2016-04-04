@@ -233,72 +233,72 @@
 
 ** Complete namespace definition
 
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/lighting.cljs :mkdirp yes :padline no
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/lighting.cljc :mkdirp yes :padline no
   (ns thi.ng.glsl.lighting
-    (:require-macros
-     [thi.ng.glsl.core :refer [defglsl]]))
+    (:require
+     [thi.ng.glsl.core :as glsl :include-macros true]))
 
-  (defglsl lambert
+  (glsl/defglsl lambert
     nil "
   <<lambert>>")
 
-  (defglsl lambert-abs
+  (glsl/defglsl lambert-abs
     nil "
   <<lambert-abs>>")
 
-  (defglsl phong
+  (glsl/defglsl phong
     nil "
   <<phong>>")
 
-  (defglsl blinn-phong
+  (glsl/defglsl blinn-phong
     nil "
   <<blinn-phong>>")
 
-  (defglsl schlick
+  (glsl/defglsl schlick
     nil "
   <<schlick>>")
 
-  (defglsl schlick-r0
+  (glsl/defglsl schlick-r0
     nil "
   <<schlick-r0>>")
 
-  (defglsl beckmann-distribution
+  (glsl/defglsl beckmann-distribution
     nil "
   <<beckmann-dist>>")
 
-  (defglsl beckmann-specular
+  (glsl/defglsl beckmann-specular
     [beckmann-distribution] "
   <<beckmann-specular>>")
 
-  (defglsl gaussian-specular
+  (glsl/defglsl gaussian-specular
     nil "
   <<gaussian>>")
 
-  (defglsl cook-torrance
+  (glsl/defglsl cook-torrance
     [beckmann-distribution] "
   <<cook-torrance>>")
 
-  (defglsl oren-nayar
+  (glsl/defglsl oren-nayar
     nil "
   <<oren-nayar>>")
 
-  (defglsl ward
+  (glsl/defglsl ward
     nil "
   <<ward>>")
 
-  (defglsl skylight
+  (glsl/defglsl skylight
     nil "
   <<skylight>>")
 
-  (defglsl skylight-color
+  (glsl/defglsl skylight-color
     [skylight] "
   <<skylight-color>>")
 
-  (defglsl spotlight-attenuation
+  (glsl/defglsl spotlight-attenuation
     nil "
   <<spotlight-att>>")
 
-  (defglsl spotlight-influence
+  (glsl/defglsl spotlight-influence
     nil "
   <<spotlight-influence>>")
 #+END_SRC

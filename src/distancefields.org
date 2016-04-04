@@ -99,44 +99,44 @@
 
 * Complete namespace definition
 
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/distancefields.cljs :mkdirp yes :padline no
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/distancefields.cljc :mkdirp yes :padline no
   (ns thi.ng.glsl.distancefields
-    (:require-macros
-     [thi.ng.glsl.core :refer [defglsl]]))
+    (:require
+     [thi.ng.glsl.core :as glsl :include-macros true]))
 
-  (defglsl sd-plane
+  (glsl/defglsl sd-plane
     nil "
     <<plane>>")
 
-  (defglsl sd-sphere
+  (glsl/defglsl sd-sphere
     nil "
     <<sphere>>")
 
-  (defglsl sd-aabb
+  (glsl/defglsl sd-aabb
     nil "
     <<aabb>>")
 
-  (defglsl sd-torus
+  (glsl/defglsl sd-torus
     nil "
     <<torus>>")
 
-  (defglsl sd-cylinder
+  (glsl/defglsl sd-cylinder
     nil "
     <<cylinder>>")
 
-  (defglsl sd-capsule
+  (glsl/defglsl sd-capsule
     nil "
     <<capsule>>")
 
-  (defglsl sd-op-sub
+  (glsl/defglsl sd-op-sub
     nil "
     <<op-sub>>")
 
-  (defglsl sd-op-union
+  (glsl/defglsl sd-op-union
     nil "
     <<op-union>>")
 
-  (defglsl sd-op-blend
+  (glsl/defglsl sd-op-blend
     nil "
     <<op-blend>>")
 #+END_SRC

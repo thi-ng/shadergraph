@@ -2,25 +2,29 @@
 
 * Contents                                                         :toc_4_gh:
  - [[#matrix-operations][Matrix operations]]
-     - [[#determinant][Determinant]]
+     - [[#determinants][Determinants]]
      - [[#inverse][Inverse]]
      - [[#transpose][Transpose]]
      - [[#complete-namespace-definition][Complete namespace definition]]
 
 * Matrix operations
-** Determinant
+** Determinants
 
-#+BEGIN_SRC glsl :noweb-ref det
+#+BEGIN_SRC glsl :noweb-ref det2
   float determinant(mat2 m) {
     return m[0][0] * m[1][1] - m[0][1] * m[1][0];
   }
+#+END_SRC
 
+#+BEGIN_SRC glsl :noweb-ref det3
   float determinant(mat3 m) {
     return m[0][0] * (m[2][2]*m[1][1] - m[1][2]*m[2][1])
       + m[0][1] * (m[1][2]*m[2][0] - m[2][2]*m[1][0])
       + m[0][2] * (m[2][1]*m[1][0] - m[1][1]*m[2][0]);
   }
+#+END_SRC
 
+#+BEGIN_SRC glsl :noweb-ref det4
   float determinant(mat4 m) {
     float
       b00 = m[0][0] * m[1][1] - m[0][1] * m[1][0],
@@ -41,12 +45,14 @@
 
 ** Inverse
 
-#+BEGIN_SRC glsl :noweb-ref invert
+#+BEGIN_SRC glsl :noweb-ref invert2
   mat2 invert(mat2 m) {
     return mat2(m[1][1], -m[0][1], -m[1][0], m[0][0])
              / (m[0][0] * m[1][1] - m[0][1] * m[1][0]);
   }
+#+END_SRC
 
+#+BEGIN_SRC glsl :noweb-ref invert3
   mat3 invert(mat3 m) {
     float a00 = m[0][0], a01 = m[0][1], a02 = m[0][2];
     float a10 = m[1][0], a11 = m[1][1], a12 = m[1][2];
@@ -62,7 +68,9 @@
                 b11, (a22 * a00 - a02 * a20), (-a12 * a00 + a02 * a10),
                 b21, (-a21 * a00 + a01 * a20), (a11 * a00 - a01 * a10)) / det;
   }
+#+END_SRC
 
+#+BEGIN_SRC glsl :noweb-ref invert4
   mat4 invert(mat4 m) {
     float
       a00 = m[0][0], a01 = m[0][1], a02 = m[0][2], a03 = m[0][3],
@@ -106,18 +114,22 @@
 
 ** Transpose
 
-#+BEGIN_SRC glsl :noweb-ref transpose
+#+BEGIN_SRC glsl :noweb-ref transpose2
   mat2 transpose(mat2 m) {
     return mat2(m[0][0], m[1][0],
                 m[0][1], m[1][1]);
   }
+#+END_SRC
 
+#+BEGIN_SRC glsl :noweb-ref transpose3
   mat3 transpose(mat3 m) {
     return mat3(m[0][0], m[1][0], m[2][0],
                 m[0][1], m[1][1], m[2][1],
                 m[0][2], m[1][2], m[2][2]);
   }
+#+END_SRC
 
+#+BEGIN_SRC glsl :noweb-ref transpose4
   mat4 transpose(mat4 m) {
     return mat4(m[0][0], m[1][0], m[2][0], m[3][0],
                 m[0][1], m[1][1], m[2][1], m[3][1],
@@ -128,20 +140,44 @@
 
 ** Complete namespace definition
 
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/matrix.cljs :mkdirp yes :padline no
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/matrix.cljc :mkdirp yes :padline no
   (ns thi.ng.glsl.matrix
-    (:require-macros
-     [thi.ng.glsl.core :refer [defglsl]]))
+    (:require
+     [thi.ng.glsl.core :as glsl :include-macros true]))
 
-  (defglsl determinant
+  (glsl/defglsl determinant2
     nil "
-  <<det>>")
+  <<det2>>")
 
-  (defglsl invert
+  (glsl/defglsl determinant3
     nil "
-  <<invert>>")
+  <<det3>>")
 
-  (defglsl transpose
+  (glsl/defglsl determinant4
     nil "
-  <<transpose>>")
+  <<det4>>")
+
+  (glsl/defglsl invert2
+    nil "
+  <<invert2>>")
+
+  (glsl/defglsl invert3
+    nil "
+  <<invert3>>")
+
+  (glsl/defglsl invert4
+    nil "
+  <<invert4>>")
+
+  (glsl/defglsl transpose2
+    nil "
+  <<transpose2>>")
+
+  (glsl/defglsl transpose3
+    nil "
+  <<transpose3>>")
+
+  (glsl/defglsl transpose4
+    nil "
+  <<transpose4>>")
 #+END_SRC

@@ -8,7 +8,6 @@
      - [[#complete-namespace-definition][Complete namespace definition]]
 
 * Fog blending equations
-
 ** Linear
 
 #+BEGIN_SRC glsl :noweb-ref linear
@@ -28,30 +27,30 @@
 ** Exponential (log2)
 
 #+BEGIN_SRC glsl :noweb-ref exp2
-  float LOG2 = -1.442695;
+  float FOG_LOG2 = -1.442695;
 
   float fogExp2(float dist, float density) {
     float d = density * dist;
-    return 1.0 - clamp(exp2(d * d * LOG2), 0.0, 1.0);
+    return 1.0 - clamp(exp2(d * d * FOG_LOG2), 0.0, 1.0);
   }
 #+END_SRC
 
 ** Complete namespace definition
 
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/fog.cljs :mkdirp yes :padline no
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/fog.cljc :mkdirp yes :padline no
   (ns thi.ng.glsl.fog
-    (:require-macros
-     [thi.ng.glsl.core :refer [defglsl]]))
+    (:require
+     [thi.ng.glsl.core :as glsl :include-macros true]))
 
-  (defglsl fog-linear
+  (glsl/defglsl fog-linear
     nil "
   <<linear>>")
 
-  (defglsl fog-exp
+  (glsl/defglsl fog-exp
     nil "
   <<exp>>")
 
-  (defglsl fog-exp2
+  (glsl/defglsl fog-exp2
     nil "
   <<exp2>>")
 #+END_SRC

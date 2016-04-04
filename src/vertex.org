@@ -52,28 +52,28 @@
 
 ** Complete namespace definition
 
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/vertex.cljs :mkdirp yes :padline no
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/vertex.cljc :mkdirp yes :padline no
   (ns thi.ng.glsl.vertex
-    (:require-macros
-     [thi.ng.glsl.core :refer [defglsl]]))
+    (:require
+     [thi.ng.glsl.core :as glsl :include-macros true]))
 
-  (defglsl mvp
+  (glsl/defglsl mvp
     nil "
   <<vertex-mvp>>")
 
-  (defglsl surface-normal
+  (glsl/defglsl surface-normal
     nil "
   <<normal>>")
 
-  (defglsl rotate-x
+  (glsl/defglsl rotate-x
     nil "
   <<rot-x>>")
 
-  (defglsl rotate-y
+  (glsl/defglsl rotate-y
     nil "
   <<rot-y>>")
 
-  (defglsl rotate-z
+  (glsl/defglsl rotate-z
     nil "
   <<rot-z>>")
 #+END_SRC

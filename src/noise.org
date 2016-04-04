@@ -99,20 +99,20 @@
 
 ** Complete namespace definition
 
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/noise.cljs :mkdirp yes :padline no
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/noise.cljc :mkdirp yes :padline no
   (ns thi.ng.glsl.noise
-    (:require-macros
-     [thi.ng.glsl.core :refer [defglsl]]))
+    (:require
+     [thi.ng.glsl.core :as glsl :include-macros true]))
 
-  (defglsl random
+  (glsl/defglsl random
     nil "
   <<random>>")
 
-  (defglsl random-low-p
+  (glsl/defglsl random-low-p
     nil "
   <<random-lowp>>")
 
-  (defglsl snoise
+  (glsl/defglsl snoise
     nil "
   <<snoise>>")
 #+END_SRC

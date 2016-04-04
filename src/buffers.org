@@ -49,26 +49,38 @@
 #+END_SRC
 
 #+BEGIN_SRC clojure :noweb-ref unpack-float
-  (def ^:private uint-buf (js/Uint8Array. 4))
-  (def ^:private float-buf (js/Float32Array. uint-buf))
+  (def ^:private uint-buf #?(:clj (ByteBuffer/allocate 4) :cljs (js/Uint8Array. 4)))
+  (def ^:private float-buf #?(:clj (.asFloatBuffer uint-buf) :cljs (js/Float32Array. uint-buf)))
 
-  (defn unpack-float
-    [a b c d]
-    (aset uint-buf 0 a)
-    (aset uint-buf 1 b)
-    (aset uint-buf 2 c)
-    (aset uint-buf 3 d)
-    (aget float-buf 0))
+  #?(:clj
+     (defn unpack-float
+       [a b c d]
+       (.put ^ByteBuffer uint-buf 0 (unchecked-byte a))
+       (.put ^ByteBuffer uint-buf 1 (unchecked-byte b))
+       (.put ^ByteBuffer uint-buf 2 (unchecked-byte c))
+       (.put ^ByteBuffer uint-buf 3 (unchecked-byte d))
+       (.get ^FloatBuffer float-buf 0))
+     :cljs
+     (defn unpack-float
+       [a b c d]
+       (aset uint-buf 0 a)
+       (aset uint-buf 1 b)
+       (aset uint-buf 2 c)
+       (aset uint-buf 3 d)
+       (aget float-buf 0)))
 #+END_SRC
 
 ** Complete namespace definition
 
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/buffers.cljs :mkdirp yes :padline no
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/buffers.cljc :mkdirp yes :padline no
   (ns thi.ng.glsl.buffers
-    (:require-macros
-     [thi.ng.glsl.core :refer [defglsl]]))
+    #?(:clj
+       (:import
+        [java.nio ByteBuffer FloatBuffer]))
+    (:require
+     [thi.ng.glsl.core :as glsl :include-macros true]))
 
-  (defglsl pack-float
+  (glsl/defglsl pack-float
     nil "
   <<pack-float>>")
 
