@@ -5,9 +5,10 @@
 ** Overview
 
 This project provides a number of commonly used GLSL shader functions
-for ClojureScript based WebGL projects and a dependency graph /
-resolution mechanism for these functions. A basic shader minifier is
-included too (both compile-time and runtime versions are provided).
+for Clojure/ClojureScript based OpenGL/WebGL projects and a dependency
+graph / resolution mechanism for these functions. A basic shader
+minifier is included too (both compile-time and runtime versions are
+provided).
 
 GLSL source code can be specified as strings or read from files.
 
@@ -16,7 +17,7 @@ partially refactored into pure functions.
 
 ** Status
 
-ALPHA quality, in active development.
+STABLE, in active development.
 
 ** Example
 
@@ -60,10 +61,10 @@ shader sources can then be combined into a full shader like this (the
 varying & uniform definitions and setters automatically):
 
 #+BEGIN_SRC clojure
-  (require '[thi.ng.geom.webgl.shaders :as s])
+  (require '[thi.ng.geom.webgl.shaders :as shaders])
 
   (def shader
-    (s/make-shader-from-spec
+    (shaders/make-shader-from-spec
      my-gl-context
      {:vs (glsl/assemble my-vertex-shader)
       :fs (glsl/assemble my-fragment-shader)
@@ -85,7 +86,7 @@ varying & uniform definitions and setters automatically):
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :exports none :noweb-ref version
-0.2.0
+0.3.0-SNAPSHOT
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -109,7 +110,7 @@ target/shadergraph-<<version>>.js
 
 **** [[https://github.com/clojure/clojurescript][ClojureScript]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs
-[org.clojure/clojurescript "1.7.228"]
+[org.clojure/clojurescript "1.8.40"]
 #+END_SRC
 
 **** [[https://github.com/kibu-australia/dependency][Dependency graph]]
@@ -217,7 +218,7 @@ symbol =version= holding the version string defined above:
 
 *** Version namespace                                              :noexport:
 
-#+BEGIN_SRC clojure :tangle ../babel/src/thi/ng/glsl/version.cljs :noweb yes :mkdirp yes :padline no
+#+BEGIN_SRC clojure :tangle ../babel/src/thi/ng/glsl/version.cljc :noweb yes :mkdirp yes :padline no
   (ns thi.ng.glsl.version)
   (def version "<<version>>")
 #+END_SRC
