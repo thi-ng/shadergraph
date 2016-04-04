@@ -1,12 +1,15 @@
 #+SETUPFILE: setup.org
 
 * Contents                                                         :toc_4_gh:
- - [[#glsl-dependency-resolution][GLSL dependency resolution]]
-     - [[#core-namespace-definition][Core namespace definition]]
- - [[#glsl-minifier][GLSL minifier]]
- - [[#macro-definitions][Macro definitions]]
+ - [[#namespace-thingglslcore][Namespace: thi.ng.glsl.core]]
+     - [[#glsl-dependency-resolution][GLSL dependency resolution]]
+     - [[#glsl-minifier][GLSL minifier]]
+     - [[#macro-definitions][Macro definitions]]
+         - [[#glsl-metadata-extraction][GLSL metadata extraction]]
+     - [[#complete-namespace-definition][Complete namespace definition]]
 
-* GLSL dependency resolution
+* Namespace: thi.ng.glsl.core
+** GLSL dependency resolution
 
 All shader functions in this library are defined via simple maps
 stored in vars, each grouping source code and dependencies to other
@@ -84,20 +87,7 @@ correct order. Note that cyclic dependencies are not supported.
     [deps src] {:deps deps :src src})
 #+END_SRC
 
-** Core namespace definition
-
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/core.cljs :mkdirp yes :padline no
-  (ns thi.ng.glsl.core
-    (:require
-     [clojure.string :as str]
-     [com.stuartsierra.dependency :as dep]))
-
-  <<minify>>
-
-  <<deps>>
-#+END_SRC
-
-* GLSL minifier
+** GLSL minifier
 
 So far the minifier only performs the following operations:
 
@@ -129,38 +119,92 @@ So far the minifier only performs the following operations:
            (clean-line-breaks))))
 #+END_SRC
 
-* Macro definitions
+** Macro definitions
 
 In addition to defining GLSL source code as Clojure strings, the
 library also allows to read source from files via the =defglsl-file=
-and =glsl-file-spec= macros. For example this spec pulls in the source
-from the file =resources/glsl/foo.glsl= in the current project dir.
+and =glsl-file-spec= macros. For example, the following spec pulls in
+the source from the file =resources/glsl/foo.glsl= in the current
+project dir.
 
 #+BEGIN_SRC clojure
   (defglsl-file foo [dep1 dep2] "resources/glsl/foo.glsl")
 #+END_SRC
 
-#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/core.clj :mkdirp yes :padline no
+#+BEGIN_SRC clojure :noweb-ref macros
+  #?(:clj
+     (defmacro minified
+       [src] `~(minify src)))
+
+  #?(:clj
+     (defmacro glsl-spec
+       [deps src] `{:deps ~deps :src (minified ~src)}))
+
+  #?(:clj
+     (defmacro glsl-file-spec
+       [deps path] `{:deps ~deps :src (minified ~(slurp path))}))
+
+  #?(:clj
+     (defmacro defglsl
+       [name deps src]
+       `(do (def ~name (glsl-spec ~deps ~src))
+            (alter-meta! (var ~name) merge ~(extract-glsl-meta src)))))
+
+  #?(:clj
+     (defmacro defglsl-file
+       [name deps path]
+       `(do (def ~name (glsl-file-spec ~deps ~path))
+            (alter-meta! (var ~name) merge ~(extract-glsl-meta (get name :src))))))
+#+END_SRC
+
+*** GLSL metadata extraction
+
+To improve the user experience and ease the development of custom
+tooling (e.g. shader editors), all shader specs created via the
+=defglsl= or =defglsl-file= macros attach GLSL metadata to their
+generated Clojue vars. This metadata can then be retrieved via
+Clojure's =meta= fn, like this:
+
+#+BEGIN_SRC clojure
+(meta #'thi.ng.glsl.lighting/skylight-color)
+
+;; {:line        165,
+;;  :column      1,
+;;  :file        "thi/ng/glsl/lighting.cljc",
+;;  :name        skylight-color,
+;;  :ns          #object[clojure.lang.Namespace 0x5ded04ed "thi.ng.glsl.lighting"],
+;;  :glsl-return "vec3",
+;;  :glsl-name   "skylightColor",
+;;  :glsl-args   ["vec3 col1" "vec3 col2" "float height"]}
+#+END_SRC
+
+#+BEGIN_SRC clojure :noweb-ref meta
+  (def ^:private re-meta
+    #"((((highp|mediump|lowp)\s+)?(bool|float|int|(b|i)?vec\d|mat\d))\s+([\w_]+)\s*\(([A-Za-z0-9_, ]*)\)\s*\{)")
+
+  (defn extract-glsl-meta
+    "Attempts to extract function name, return type and args from given
+    GLSL source string. If successful, returns map w/ these
+    keys: :glsl-name :glsl-return :glsl-args"
+    [src]
+    (if-let [m (first (re-seq re-meta src))]
+      {:glsl-return (nth m 2)
+       :glsl-name (nth m 7)
+       :glsl-args (str/split (nth m 8) #",\s*")}))
+#+END_SRC
+
+** Complete namespace definition
+#+BEGIN_SRC clojure :noweb yes :tangle ../babel/src/thi/ng/glsl/core.cljc :mkdirp yes :padline no
   (ns thi.ng.glsl.core
     (:require
-     [clojure.string :as str]))
+     [clojure.string :as str]
+     [com.stuartsierra.dependency :as dep]))
 
   <<minify>>
 
-  (defmacro minified
-    [src] `~(minify src))
+  <<meta>>
 
-  (defmacro glsl-spec
-    [deps src] `{:deps ~deps :src (minified ~src)})
+  <<macros>>
 
-  (defmacro glsl-file-spec
-    [deps path] `{:deps ~deps :src (minified ~(slurp path))})
-
-  (defmacro defglsl
-    [name deps src]
-    `(def ~name (glsl-spec ~deps ~src)))
-
-  (defmacro defglsl-file
-    [name deps path]
-    `(def ~name (glsl-file-spec ~deps ~path)))
+  <<deps>>
 #+END_SRC
