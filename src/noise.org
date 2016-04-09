@@ -3,6 +3,7 @@
 * Contents                                                         :toc_4_gh:
  - [[#noise--randomness][Noise & randomness]]
      - [[#pseudo-rngs][Pseudo RNGs]]
+     - [[#fractal-noise][Fractal noise]]
      - [[#simplex-noise][Simplex noise]]
      - [[#complete-namespace-definition][Complete namespace definition]]
 
@@ -28,6 +29,35 @@
   }
 #+END_SRC
 
+#+BEGIN_SRC glsl :noweb-ref hash-n
+  float hashN(float n) { return fract(sin(n) * 758.5453); }
+#+END_SRC
+
+#+BEGIN_SRC glsl :noweb-ref noise-3
+  float noise3(vec3 x) {
+    vec3 p = floor(x);
+    vec3 f = fract(x);
+    float n = p.x + p.y * 57.0 + p.z * 800.0;
+    return mix(mix(mix(hashN(n), hashN(n + 1.0), f.x),
+                   mix(hashN(n + 57.0), hashN(n + 58.0), f.x), f.y),
+               mix(mix(hashN(n + 800.0), hashN(n + 801.0), f.x),
+                   mix(hashN(n + 857.0), hashN(n + 858.0), f.x), f.y), f.z);
+  }
+#+END_SRC
+
+** Fractal noise
+
+#+BEGIN_SRC glsl :noweb-ref fbm-3
+  float fbm3(vec3 p) {
+    float f = 0.0;
+    f += 0.50000 * noise3(p); p *= 2.02;
+    f -= 0.25000 * noise3(p); p *= 2.03;
+    f += 0.12500 * noise3(p); p *= 2.01;
+    f += 0.06250 * noise3(p); p *= 2.04;
+    f -= 0.03125 * noise3(p);
+    return f / 0.984375;
+  }
+#+END_SRC
 ** Simplex noise
 
 #+BEGIN_SRC glsl :noweb-ref snoise
@@ -111,6 +141,18 @@
   (glsl/defglsl random-low-p
     nil "
   <<random-lowp>>")
+
+  (glsl/defglsl hash-n
+    nil "
+  <<hash-n>>")
+
+  (glsl/defglsl noise-3
+    [hash-n] "
+  <<noise-3>>")
+
+  (glsl/defglsl fbm-3
+    [noise-3] "
+  <<fbm-3>>")
 
   (glsl/defglsl snoise
     nil "
