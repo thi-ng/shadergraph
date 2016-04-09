@@ -95,9 +95,20 @@ So far the minifier only performs the following operations:
 - whitespace removal
 
 #+BEGIN_SRC clojure :noweb-ref minify
+  (defn- minify-floats
+    [src]
+    (str/replace
+     src #"(\d+)\.(\d+)"
+     (fn [[o d f]]
+       (cond
+         (= "0" d)        (str \. f)
+         (every? #{\0} f) (str d \.)
+         :else            o))))
+
   (defn- minify-line
     [src]
     (let [src (-> src
+                  (minify-floats)
                   (str/replace #"\s{2,}|\t" "")
                   (str/replace #"\s*(\{|\}|\=|\*|\,|\+|/|\>|\<|\&|\||\[|\]|\(|\)|\-|\!|\;)\s*" "$1"))]
       (if (= \# (first src))
@@ -180,7 +191,7 @@ Clojure's =meta= fn, like this:
 
 #+BEGIN_SRC clojure :noweb-ref meta
   (def ^:private re-meta
-    #"((((highp|mediump|lowp)\s+)?(bool|float|int|(b|i)?vec\d|mat\d))\s+([\w_]+)\s*\(([A-Za-z0-9_, ]*)\)\s*\{)")
+    #"((((highp|mediump|lowp)\s+)?(void|bool|float|int|(b|i)?vec\d|mat\d))\s+([\w_]+)\s*\(([A-Za-z0-9_, ]*)\)\s*\{)")
 
   (defn extract-glsl-meta
     "Attempts to extract function name, return type and args from given
@@ -188,9 +199,12 @@ Clojure's =meta= fn, like this:
     keys: :glsl-name :glsl-return :glsl-args"
     [src]
     (if-let [m (first (re-seq re-meta src))]
-      {:glsl-return (nth m 2)
-       :glsl-name (nth m 7)
-       :glsl-args (str/split (nth m 8) #",\s*")}))
+      (let [return (nth m 2)
+            name   (nth m 7)
+            args   (vec (filter seq (str/split (nth m 8) #",\s*")))]
+        {:glsl-return return
+         :glsl-name   name
+         :glsl-args   args})))
 #+END_SRC
 
 ** Complete namespace definition

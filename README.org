@@ -1,0 +1,339 @@
+#+SETUPFILE: src/setup.org
+#+TITLE: thi.ng/shadergraph
+
+* Contents                                                         :toc_3_gh:
+ - [[#about-the-project][About the project]]
+     - [[#overview][Overview]]
+     - [[#leiningen-coordinates][Leiningen coordinates]]
+         - [[#latest-stable][Latest stable]]
+         - [[#latest-snapshot][Latest snapshot]]
+     - [[#status][Status]]
+     - [[#usage-example][Usage example]]
+     - [[#module-namespaces][Module namespaces]]
+     - [[#tests][Tests]]
+     - [[#building--testing-this-project][Building & testing this project]]
+ - [[#project-definition][Project definition]]
+     - [[#building--testing-this-project][Building & testing this project]]
+         - [[#testing][Testing]]
+         - [[#working-with-the-repl][Working with the REPL]]
+     - [[#injected-properties][Injected properties]]
+     - [[#dependencies][Dependencies]]
+         - [[#runtime][Runtime]]
+         - [[#development][Development]]
+     - [[#leiningen-project-file][Leiningen project file]]
+     - [[#clojurescript-html-harness][ClojureScript HTML harness]]
+     - [[#accessing-library-version-during-runtime][Accessing library version during runtime]]
+         - [[#version-namespace][Version namespace]]
+     - [[#release-history][Release history]]
+     - [[#contributors][Contributors]]
+
+* About the project
+** Overview
+
+This project provides a function-oriented approach to composing
+complex shaders. The library contains:
+
+- Dozens of pure GLSL functions, generally useful and often used in
+  GLSL shaders for both OpenGL & WebGL projects (both Clojure &
+  Clojurescript).
+- Automatic Clojure metadata generation for GLSL functions (incl. arg
+  lists) to help with documentation in the REPL or for custom tool
+  development.
+- A generic transitive dependency graph resolution mechanism for any
+  shader functions defined (*not just in this library*).
+- An optional basic shader minifier (without name mangling)
+- GLSL source code can be specified as strings or read from files/resources
+
+Several shader functions have been gathered from literature and other
+projects and been partially refactored as pure functions.
+
+** Leiningen coordinates
+*** Latest stable
+#+BEGIN_SRC
+[thi.ng/shadergraph "0.2.0"]
+#+END_SRC
+
+*** Latest snapshot
+#+BEGIN_SRC
+[thi.ng/shadergraph "0.3.0-SNAPSHOT"]
+#+END_SRC
+
+** Status
+
+STABLE, in active development.
+
+** Usage example
+
+The brief example below defines a shader pair with standard [[https://en.wikipedia.org/wiki/Lambertian_reflectance][Lambert
+lighting]]. The =defglsl= macro is used to define a GLSL sourcecode
+snippet with (optional) dependencies. *It also minifies the original
+sources at compile time* (all snippets provided by this library are
+minified this way).
+
+#+BEGIN_SRC clojure
+  (ns example
+    (:require
+     [thi.ng.glsl.core :as glsl :include-macros true]
+     [thi.ng.glsl.vertex]
+     [thi.ng.glsl.lighting]))
+
+  (glsl/defglsl my-vertex-shader
+    [thi.ng.glsl.vertex/mvp
+     thi.ng.glsl.vertex/surface-normal]
+    "void main() {
+       vNormal = surfaceNormal(normal, normalMat);
+       gl_Position = mvp(position, model, view, proj);
+     }")
+
+  (glsl/defglsl my-fragment-shader
+    [thi.ng.glsl.lighting/lambert]
+    "void main() {
+       float lam = lambert(normalize(vNormal), normalize(lightDir));
+       gl_FragColor = vec4(ambientCol + diffuseCol * lightCol * lam, 1.0);
+     }")
+#+END_SRC
+
+Apart from the =defglsl= macro, the =assemble= function is the other
+main tool in this library. It takes a map of GLSL dependencies and
+sourcecode and returns a transformed/expanded source with all
+transitive deps injected in the correct order. The =my-vertex-shader=
+spec above in assembled form will expand to:
+
+#+BEGIN_SRC clojure
+  (glsl/assemble my-vertex-shader)
+  ;; "vec3 surfaceNormal(vec3 normal,mat4 normalMat){return normalize((normalMat*vec4(normal,.0)).xyz);}vec4 mvp(vec3 pos,mat4 model,mat4 view,mat4 proj){return proj*view*model*vec4(pos,1.);}void main(){vNormal=surfaceNormal(normal,normalMat);gl_Position=mvp(position,model,view,proj);}"
+#+END_SRC
+
+Using another library like, e.g. [[https://github.com/thi-ng/geom/][thi.ng/geom]] 's GL module, these
+shader sources can then be combined into a fully defined shader like
+this (the =make-shader-from-spec= function used below generates all
+attribute, varying & uniform definitions and setters automatically and
+returns a compiled shader program):
+
+#+BEGIN_SRC clojure
+  (require '[thi.ng.geom.gl.shaders :as shaders])
+
+  (def shader
+    (shaders/make-shader-from-spec
+     my-gl-context
+     {:vs (glsl/assemble my-vertex-shader)
+      :fs (glsl/assemble my-fragment-shader)
+      :uniforms {:model      :mat4
+                 :view       :mat4
+                 :proj       :mat4
+                 :normalMat  :mat4
+                 :ambientCol :vec3
+                 :diffuseCol :vec3
+                 :lightCol   :vec3
+                 :lightDir   :vec3}
+      :attribs  {:position   :vec3
+                 :normal     :vec3}
+      :varying  {:vNormal    :vec3}}))
+#+END_SRC
+
+** Module namespaces
+
+- [[src/core.org][thi.ng.glsl.core]]
+- [[src/buffers.org][thi.ng.glsl.buffers]]
+- [[src/color.org][thi.ng.glsl.color]]
+- [[src/distancefields.org][thi.ng.glsl.distancefields]]
+- [[src/fog.org][thi.ng.glsl.fog]]
+- [[src/grid.org][thi.ng.glsl.grid]]
+- [[src/lighting.org][thi.ng.glsl.lighting]]
+- [[src/matrix.org][thi.ng.glsl.matrix]]
+- [[src/noise.org][thi.ng.glsl.noise]]
+- [[src/vertex.org][thi.ng.glsl.vertex]]
+
+** Tests
+
+- [[test/core.org]]
+** Building & testing this project
+* Project definition
+** Building & testing this project
+
+This project is written in a literate programming format and requires
+[[https://www.gnu.org/software/emacs/][Emacs]] & [[http://orgmode.org][Org-mode]] to generate usable source code. Assuming both tools
+are installed, the easiest way to generate a working project is via
+command line (make sure =emacs= is on your path or else edit its path
+in =tangle.sh=):
+
+#+BEGIN_SRC bash
+  git clone https://github.com/thi-ng/shadergraph.git
+  cd shadergraph
+
+  # tangle selected files
+  ./tangle.sh README.org src/*.org test/*.org
+
+  # ...or individual file
+  ./tangle.sh src/core.org
+#+END_SRC
+
+Tangling is the process of extracting & combining source blocks from
+=.org= files into an actual working project/source tree.
+
+Once tangling is complete, you can =cd= into the generated project
+directory (=babel= in this case) and then use =lein= as usual.
+
+*** Testing
+
+The =project.clj= file define an alias to trigger a
+complete build & tests for both CLJ & CLJS versions.
+
+#+BEGIN_SRC bash
+  cd babel
+  lein cleantest # some tests currently fail due to still missing protocol impls
+#+END_SRC
+
+To only build the Clojurescript version simply run =lein cljsbuild
+test= from the same directory. A small HTML harness for the resulting
+JS file is also located in that folder (=babel/index.html=), allowing
+for further experimentation in the browser.
+
+*** Working with the REPL
+
+Editing code blocks / files in Org-mode, then re-loading & testing
+changes is quite trivial. Simply launch a REPL (via lein or Emacs) as
+usual. Everytime you've made changes to an =.org= file, re-tangle it
+from Emacs or =tangle.sh=, then reload the namespace in the REPL via
+=(require 'thi.ng.glsl... :reload)= or similar.
+
+** Injected properties                                             :noexport:
+
+#+BEGIN_SRC clojure :exports none :noweb-ref version
+0.3.0-SNAPSHOT
+#+END_SRC
+
+#+BEGIN_SRC clojure :exports none :noweb-ref project-url
+https://github.com/thi-ng/shadergraph
+#+END_SRC
+
+#+BEGIN_SRC clojure :exports none :noweb-ref project-name
+thi.ng/shadergraph
+#+END_SRC
+
+#+BEGIN_SRC clojure :exports none :noweb yes :noweb-ref cljs-artefact-path
+target/shadergraph-<<version>>.js
+#+END_SRC
+
+** Dependencies
+*** Runtime
+**** [[https://github.com/clojure/clojure][Clojure]]
+#+BEGIN_SRC clojure :noweb-ref dep-clj
+[org.clojure/clojure "1.8.0"]
+#+END_SRC
+
+**** [[https://github.com/clojure/clojurescript][ClojureScript]]
+#+BEGIN_SRC clojure :noweb-ref dep-cljs
+[org.clojure/clojurescript "1.8.40"]
+#+END_SRC
+
+**** [[https://github.com/kibu-australia/dependency][Dependency graph]]
+#+BEGIN_SRC clojure :noweb-ref dep-dep
+[com.postspectacular/dependency "0.1.2"]
+#+END_SRC
+
+*** Development
+**** [[https://github.com/cemerick/clojurescript.test][clojurescript.test]]
+#+BEGIN_SRC clojure :noweb-ref dep-cljs-test
+[com.cemerick/clojurescript.test "0.3.3"]
+#+END_SRC
+
+**** [[https://github.com/emezeske/lein-cljsbuild][Cljsbuild]]
+#+BEGIN_SRC clojure :noweb-ref dep-cljsbuild
+[lein-cljsbuild "1.1.3"]
+#+END_SRC
+
+** Leiningen project file                                          :noexport:
+
+#+BEGIN_SRC clojure :tangle babel/project.clj :noweb yes :mkdirp yes :padline no
+  (defproject <<project-name>> "<<version>>"
+    :description  "WebGL/GLSL shader library & dependency graph for ClojureScript"
+    :url          "<<project-url>>"
+    :license      {:name "Apache Software License"
+                   :url "http://www.apache.org/licenses/LICENSE-2.0"
+                   :distribution :repo}
+    :scm          {:name "git"
+                   :url  "<<project-url>>"}
+
+    :min-lein-version "2.4.0"
+
+    :dependencies [<<dep-clj>>
+                   <<dep-cljs>>
+                   <<dep-dep>>]
+
+    :profiles {:dev {:plugins [<<dep-cljsbuild>>
+                               <<dep-cljs-test>>]
+                     :aliases {"cleantest" ["do" "clean," "cljsbuild" "test"]}}}
+
+    :cljsbuild {:builds [{:source-paths ["src" "test"]
+                          :id "simple"
+                          :compiler {:output-to "<<cljs-artefact-path>>"
+                                     :optimizations :whitespace
+                                     :pretty-print true}}
+                         {:source-paths ["src" "test"]
+                          :id "prod"
+                          :compiler {:output-to "<<cljs-artefact-path>>"
+                                     :optimizations :advanced
+                                     :pretty-print false}}]
+                :test-commands {"unit-tests" ["phantomjs" :runner "<<cljs-artefact-path>>"]}}
+
+    :pom-addition [:developers [:developer
+                                [:name "Karsten Schmidt"]
+                                [:url "http://postspectacular.com"]
+                                [:timezone "0"]]])
+#+END_SRC
+
+** ClojureScript HTML harness                                      :noexport:
+
+#+BEGIN_SRC html :tangle babel/index.html :noweb yes :mkdirp yes :padline no
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <title><<project-name>> <<version>> test</title>
+    </head>
+    <body>
+      <canvas id="main" width="640" height="480"></canvas>
+      <script type="text/javascript" src="<<cljs-artefact-path>>"></script>
+    </body>
+  </html>
+#+END_SRC
+
+** Accessing library version during runtime
+
+The autogenerated namespace =thi.ng.glsl.version= contains a single
+symbol =version= holding the version string defined above:
+
+#+BEGIN_SRC clojure :noweb yes
+  (use 'thi.ng.glsl.version)
+  
+  (prn version)
+  ; "<<version>>"
+#+END_SRC
+
+*** Version namespace                                              :noexport:
+
+#+BEGIN_SRC clojure :tangle babel/src/thi/ng/glsl/version.cljc :noweb yes :mkdirp yes :padline no
+  (ns thi.ng.glsl.version)
+  (def version "<<version>>")
+#+END_SRC
+
+** Release history
+
+| *Version* | *Released* | *Description*                         | *Lein coordinates*                      | *Tagged Github URL* |
+|-----------+------------+---------------------------------------+-----------------------------------------+---------------------|
+|     0.3.0 |        n/a | CLJC refactor, metadata, ns additions | =[thi.ng/shadergraph "0.3.0-SNAPSHOT"]= |                     |
+|     0.2.0 | 2016-03-20 | bugfix minify, update fn naming       | =[thi.ng/shadergraph "0.2.0"]=          | [[https://github.com/thi-ng/shadergraph/tree/0.2.0][0.2.0]]               |
+|     0.1.1 | 2015-04-27 | bugfix assemble                       | =[thi.ng/shadergraph "0.1.1"]=          | [[https://github.com/thi-ng/shadergraph/tree/0.1.1][0.1.1]]               |
+|     0.1.0 | 2015-02-25 | 1st release                           | =[thi.ng/shadergraph "0.1.0"]=          | [[https://github.com/thi-ng/shadergraph/tree/0.1.0][0.1.0]]               |
+
+** Contributors
+
+| *Name*          | *Role*                          | *Website*           |
+| [[mailto:k@thi.ng][Karsten Schmidt]] | initiator & principal developer | [[http://postspectacular.com][postspectacular.com]] |
+|                 |                                 | [[http://thi.ng][thi.ng]]              |
+|-----------------+---------------------------------+---------------------|
+| Tristan Strange | bugfixes                        | [[https://github.com/triss][@triss]]              |
+
+
+
+
