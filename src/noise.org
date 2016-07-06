@@ -3,6 +3,7 @@
 * Contents                                                         :toc_4_gh:
  - [[#noise--randomness][Noise & randomness]]
      - [[#pseudo-rngs][Pseudo RNGs]]
+     - [[#fast-hash32][Fast Hash32]]
      - [[#fractal-noise][Fractal noise]]
      - [[#simplex-noise][Simplex noise]]
      - [[#complete-namespace-definition][Complete namespace definition]]
@@ -42,6 +43,26 @@
                    mix(hashN(n + 57.0), hashN(n + 58.0), f.x), f.y),
                mix(mix(hashN(n + 800.0), hashN(n + 801.0), f.x),
                    mix(hashN(n + 857.0), hashN(n + 858.0), f.x), f.y), f.z);
+  }
+#+END_SRC
+
+** Fast Hash32
+
+- https://briansharpe.wordpress.com/2011/11/15/a-fast-and-simple-32bit-floating-point-hash-function/
+- https://briansharpe.wordpress.com/2013/06/27/adding-a-4th-dimension/
+
+#+BEGIN_SRC glsl :noweb-ref fast-hash32
+  vec4 fast_hash32(vec2 pos) {
+    // pos is assumed to be an integer coordinate
+    const vec2 OFFSET = vec2(403.839172, 377.242706);
+    const float DOMAIN = 71.0;
+    const float K = 32745.708984;
+    const vec2 SCALE = vec2(2.009842, 1.372549);
+    vec4 P = vec4(pos, pos + 1.0);
+    P = P - floor(P * (1.0 / DOMAIN)) * DOMAIN;
+    P = P * SCALE.xyxy + OFFSET.xyxy;
+    P *= P;
+    return fract(P.xzxz * P.yyww * (1.0 / K));
   }
 #+END_SRC
 
