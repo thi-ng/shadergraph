@@ -48,14 +48,9 @@ Several shader functions have been gathered from literature and other
 projects and been partially refactored as pure functions.
 
 ** Leiningen coordinates
-*** Latest stable
-#+BEGIN_SRC
-[thi.ng/shadergraph "0.3.0"]
-#+END_SRC
 
-*** Latest snapshot
 #+BEGIN_SRC
-[thi.ng/shadergraph "0.3.0-SNAPSHOT"]
+[thi.ng/shadergraph "0.3.1"]
 #+END_SRC
 
 ** Status
@@ -200,7 +195,7 @@ from Emacs or =tangle.sh=, then reload the namespace in the REPL via
 ** Injected properties                                             :noexport:
 
 #+BEGIN_SRC clojure :exports none :noweb-ref version
-0.3.0
+0.3.1
 #+END_SRC
 
 #+BEGIN_SRC clojure :exports none :noweb-ref project-url
@@ -219,12 +214,12 @@ target/shadergraph-<<version>>.js
 *** Runtime
 **** [[https://github.com/clojure/clojure][Clojure]]
 #+BEGIN_SRC clojure :noweb-ref dep-clj
-[org.clojure/clojure "1.9.0"]
+[org.clojure/clojure "1.11.1"]
 #+END_SRC
 
 **** [[https://github.com/clojure/clojurescript][ClojureScript]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljs
-[org.clojure/clojurescript "1.10.238"]
+[org.clojure/clojurescript "1.11.4"]
 #+END_SRC
 
 **** [[https://github.com/kibu-australia/dependency][Dependency graph]]
@@ -240,7 +235,7 @@ target/shadergraph-<<version>>.js
 
 **** [[https://github.com/emezeske/lein-cljsbuild][Cljsbuild]]
 #+BEGIN_SRC clojure :noweb-ref dep-cljsbuild
-[lein-cljsbuild "1.1.7"]
+[lein-cljsbuild "1.1.8"]
 #+END_SRC
 
 ** Leiningen project file                                          :noexport:
@@ -279,8 +274,8 @@ target/shadergraph-<<version>>.js
 
     :pom-addition [:developers [:developer
                                 [:name "Karsten Schmidt"]
-                                [:url "http://postspectacular.com"]
-                                [:timezone "0"]]])
+                                [:url "https://thi.ng"]
+                                [:timezone "1"]]])
 #+END_SRC
 
 ** ClojureScript HTML harness                                      :noexport:
@@ -321,18 +316,18 @@ symbol =version= holding the version string defined above:
 
 | *Version* | *Released* | *Description*                         | *Lein coordinates*                      | *Tagged Github URL* |
 |-----------+------------+---------------------------------------+-----------------------------------------+---------------------|
-|     0.3.0 |        n/a | CLJC refactor, metadata, ns additions | =[thi.ng/shadergraph "0.3.0-SNAPSHOT"]= |                     |
-|     0.2.0 | 2016-03-20 | bugfix minify, update fn naming       | =[thi.ng/shadergraph "0.2.0"]=          | [[https://github.com/thi-ng/shadergraph/tree/0.2.0][0.2.0]]               |
-|     0.1.1 | 2015-04-27 | bugfix assemble                       | =[thi.ng/shadergraph "0.1.1"]=          | [[https://github.com/thi-ng/shadergraph/tree/0.1.1][0.1.1]]               |
-|     0.1.0 | 2015-02-25 | 1st release                           | =[thi.ng/shadergraph "0.1.0"]=          | [[https://github.com/thi-ng/shadergraph/tree/0.1.0][0.1.0]]               |
+|     0.3.1 | 2022-04-23 | update deps                           | =[thi.ng/shadergraph "0.3.1"]=          | [[https://github.com/thi-ng/shadergraph/tree/0.3.1][0.3.1]] |
+|     0.3.0 |        ??? | CLJC refactor, metadata, ns additions | =[thi.ng/shadergraph "0.3.0"]=          |                                                             |
+|     0.2.0 | 2016-03-20 | bugfix minify, update fn naming       | =[thi.ng/shadergraph "0.2.0"]=          | [[https://github.com/thi-ng/shadergraph/tree/0.2.0][0.2.0]] |
+|     0.1.1 | 2015-04-27 | bugfix assemble                       | =[thi.ng/shadergraph "0.1.1"]=          | [[https://github.com/thi-ng/shadergraph/tree/0.1.1][0.1.1]] |
+|     0.1.0 | 2015-02-25 | 1st release                           | =[thi.ng/shadergraph "0.1.0"]=          | [[https://github.com/thi-ng/shadergraph/tree/0.1.0][0.1.0]] |
 
 ** Contributors
 
 | *Name*          | *Role*                          | *Website*           |
-| [[mailto:k@thi.ng][Karsten Schmidt]] | initiator & principal developer | [[http://postspectacular.com][postspectacular.com]] |
-|                 |                                 | [[http://thi.ng][thi.ng]]              |
+| Karsten Schmidt | initiator & principal developer | https://thi.ng      |
 |-----------------+---------------------------------+---------------------|
-| Tristan Strange | bugfixes                        | [[https://github.com/triss][@triss]]              |
+| Tristan Strange | bugfixes                        | [[https://github.com/triss][@triss]] |
 
 
 
